@@ -1,0 +1,38 @@
+@use '../../styles/settings';
+
+.header {
+  background: settings.$off-black;
+  color: white; 
+  margin-bottom: settings.$m-size;
+  padding: settings.$m-size 0;
+}
+
+.container {
+  box-sizing: border-box;
+	max-width: 80rem;
+	margin: 0 auto;
+  padding: 0 settings.$m-size;
+  height: 100%;
+}
+
+.title {
+	font-size: settings.$l-size;
+	margin: 0;
+}
+
+.subtitle {
+	color: settings.$off-white;
+	font-size: settings.$m-size;
+	font-weight: 500;
+	margin: 0;
+}
+
+@media (min-width: settings.$desktop-breakpoint) {
+	.header {
+		margin-bottom: settings.$xl-size;
+  }
+  
+  .container {
+		width: 100%;
+	}
+}

@@ -1,0 +1,9 @@
+@use '../../styles/settings';
+
+.canvas {
+  box-sizing: border-box;
+  background: settings.$light-blue;
+  border: 1px solid black;
+  height: 100%;
+  width: 75rem;
+}

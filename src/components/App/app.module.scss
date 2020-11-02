@@ -1,0 +1,16 @@
+@use '../../styles/settings';
+
+.container {
+  display: none;
+}
+
+@media (min-width: settings.$desktop-breakpoint) {
+	.container {
+    box-sizing: border-box;
+    display: flex;
+    margin: 0 auto;
+    height: 75rem;
+    width: 90rem;
+    margin-bottom: settings.$xl-size;
+	}
+}

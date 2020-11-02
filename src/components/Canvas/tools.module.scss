@@ -1,0 +1,21 @@
+@use '../../styles/settings';
+
+.button {
+	background: settings.$purple;
+	border: none;
+	border-bottom: 0.3rem solid darken(settings.$purple, 10%);
+	color: white;
+  font-weight: 500;
+  margin-bottom: settings.$xs-size;
+	padding: settings.$s-size;
+}
+
+.button:disabled {
+	opacity: 0.5;
+}
+
+.tools {
+  display: flex;
+  flex-direction: column;
+  margin-left: settings.$xs-size;
+}
