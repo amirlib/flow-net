@@ -20,6 +20,7 @@ export default class Canvas extends React.Component {
 
     this.canvasClick = this.canvasClick.bind(this);
     this.canvasMouseMove = this.canvasMouseMove.bind(this);
+    this.removeLastElementInGraph = this.removeLastElementInGraph.bind(this);
     this.state = {
       graph: [
         Canvas.createNodeElement(0, 50, 350),
@@ -38,6 +39,10 @@ export default class Canvas extends React.Component {
         this.setNode(750, 25);
 
         break;
+      case 'stop':
+        this.removeLastElementInGraph();
+
+        break;
       default:
         break;
     }
@@ -46,11 +51,8 @@ export default class Canvas extends React.Component {
   setNode(coorX, coorY) {
     const { graph } = this.state;
     const node = Canvas.createNodeElement(graph.length, coorX, coorY);
-    const copiedGraph = Array.from(graph);
 
-    copiedGraph.push(node);
-
-    this.setState(() => ({ graph: copiedGraph }));
+    this.setState((prevState) => ({ graph: prevState.graph.concat([node]) }));
   }
 
   canvasClick(event) {
@@ -79,6 +81,14 @@ export default class Canvas extends React.Component {
       default:
         event.preventDefault();
     }
+  }
+
+  removeLastElementInGraph() {
+    const { changeMode } = this.props;
+
+    this.setState((prevState) => ({ graph: prevState.graph.slice(0, prevState.graph.length - 1) }));
+
+    changeMode('none');
   }
 
   updateCoordinatesOfLastGraphObject(pageX, pageY) {
@@ -119,6 +129,7 @@ export default class Canvas extends React.Component {
 
 Canvas.propTypes = {
   addNode: PropTypes.func.isRequired,
+  changeMode: PropTypes.func.isRequired,
   mode: PropTypes.string,
 };
 

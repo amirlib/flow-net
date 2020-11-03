@@ -14,8 +14,10 @@ export default class App extends React.Component {
     this.tool = new Gca();
     this.graph = this.tool.CreateFlowGraph();
     this.addNode = this.addNode.bind(this);
+    this.changeMode = this.changeMode.bind(this);
     this.isUndoButtonHadToBeDisabled = this.isUndoButtonHadToBeDisabled.bind(this);
-    this.newNode = this.newNode.bind(this);
+    this.newNodeMode = this.newNodeMode.bind(this);
+    this.stopMode = this.stopMode.bind(this);
     this.state = {
       mode: props.mode,
       nodeButtonDisabled: props.nodeButtonDisabled,
@@ -35,7 +37,17 @@ export default class App extends React.Component {
     }));
   }
 
-  newNode() {
+  changeMode(mode) {
+    this.setState(() => ({ mode }));
+  }
+
+  isUndoButtonHadToBeDisabled() {
+    if (this.graph.countEdges() === 0 && this.graph.nodesID.length === 2) return true;
+
+    return false;
+  }
+
+  newNodeMode() {
     this.setState(() => ({
       mode: 'new-node',
       nodeButtonDisabled: true,
@@ -44,10 +56,13 @@ export default class App extends React.Component {
     }));
   }
 
-  isUndoButtonHadToBeDisabled() {
-    if (this.graph.countEdges() === 0 && this.graph.nodesID.length === 2) return true;
-
-    return false;
+  stopMode() {
+    this.setState(() => ({
+      mode: 'stop',
+      nodeButtonDisabled: false,
+      stopButtonDisabled: true,
+      undoButtonDisabled: this.isUndoButtonHadToBeDisabled(),
+    }));
   }
 
   render() {
@@ -74,11 +89,13 @@ export default class App extends React.Component {
           <Canvas
             mode={mode}
             addNode={this.addNode}
+            changeMode={this.changeMode}
           />
           <Tools
             nodeButtonDisabled={nodeButtonDisabled}
-            newNode={this.newNode}
+            newNode={this.newNodeMode}
             stopButtonDisabled={stopButtonDisabled}
+            stop={this.stopMode}
             undoButtonDisabled={undoButtonDisabled}
           />
         </div>
