@@ -17,7 +17,9 @@ export default class App extends React.Component {
     this.changeMode = this.changeMode.bind(this);
     this.isUndoButtonHadToBeDisabled = this.isUndoButtonHadToBeDisabled.bind(this);
     this.newNodeMode = this.newNodeMode.bind(this);
+    this.removeElement = this.removeElement.bind(this);
     this.stopMode = this.stopMode.bind(this);
+    this.undoMode = this.undoMode.bind(this);
     this.state = {
       mode: props.mode,
       nodeButtonDisabled: props.nodeButtonDisabled,
@@ -56,6 +58,22 @@ export default class App extends React.Component {
     }));
   }
 
+  removeElement(element) {
+    switch (element.type) {
+      case 'node':
+        this.graph.deleteNode(element.id);
+
+        break;
+      default:
+        break;
+    }
+
+    this.setState(() => ({
+      mode: 'none',
+      undoButtonDisabled: this.isUndoButtonHadToBeDisabled(),
+    }));
+  }
+
   stopMode() {
     this.setState(() => ({
       mode: 'stop',
@@ -63,6 +81,10 @@ export default class App extends React.Component {
       stopButtonDisabled: true,
       undoButtonDisabled: this.isUndoButtonHadToBeDisabled(),
     }));
+  }
+
+  undoMode() {
+    this.setState(() => ({ mode: 'undo' }));
   }
 
   render() {
@@ -90,6 +112,7 @@ export default class App extends React.Component {
             mode={mode}
             addNode={this.addNode}
             changeMode={this.changeMode}
+            removeElement={this.removeElement}
           />
           <Tools
             nodeButtonDisabled={nodeButtonDisabled}
@@ -97,6 +120,7 @@ export default class App extends React.Component {
             stopButtonDisabled={stopButtonDisabled}
             stop={this.stopMode}
             undoButtonDisabled={undoButtonDisabled}
+            undo={this.undoMode}
           />
         </div>
       </div>

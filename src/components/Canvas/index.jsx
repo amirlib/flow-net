@@ -20,9 +20,10 @@ export default class Canvas extends React.Component {
 
     this.canvasClick = this.canvasClick.bind(this);
     this.canvasMouseMove = this.canvasMouseMove.bind(this);
-    this.removeLastElementInGraph = this.removeLastElementInGraph.bind(this);
+    this.removeElementFromGraph = this.removeElementFromGraph.bind(this);
+    this.stopDrawing = this.stopDrawing.bind(this);
     this.state = {
-      graph: [
+      draw: [
         Canvas.createNodeElement(0, 50, 350),
         Canvas.createNodeElement(1, 700, 350),
       ],
@@ -40,7 +41,11 @@ export default class Canvas extends React.Component {
 
         break;
       case 'stop':
-        this.removeLastElementInGraph();
+        this.stopDrawing();
+
+        break;
+      case 'undo':
+        this.removeElementFromGraph();
 
         break;
       default:
@@ -49,16 +54,16 @@ export default class Canvas extends React.Component {
   }
 
   setNode(coorX, coorY) {
-    const { graph } = this.state;
-    const node = Canvas.createNodeElement(graph.length, coorX, coorY);
+    const { draw } = this.state;
+    const node = Canvas.createNodeElement(draw.length, coorX, coorY);
 
-    this.setState((prevState) => ({ graph: prevState.graph.concat([node]) }));
+    this.setState((prevState) => ({ draw: prevState.draw.concat([node]) }));
   }
 
   canvasClick(event) {
     const { addNode, mode } = this.props;
-    const { graph } = this.state;
-    const lastElement = graph[graph.length - 1];
+    const { draw } = this.state;
+    const lastElement = draw[draw.length - 1];
 
     switch (mode) {
       case 'new-node':
@@ -75,7 +80,7 @@ export default class Canvas extends React.Component {
 
     switch (mode) {
       case 'new-node':
-        this.updateCoordinatesOfLastGraphObject(event.pageX, event.pageY);
+        this.updateCoordinatesOfLastDrawElement(event.pageX, event.pageY);
 
         break;
       default:
@@ -83,27 +88,39 @@ export default class Canvas extends React.Component {
     }
   }
 
-  removeLastElementInGraph() {
+  removeLastElementInDraw() {
+    this.setState((prevState) => ({ draw: prevState.draw.slice(0, prevState.draw.length - 1) }));
+  }
+
+  removeElementFromGraph() {
+    const { removeElement } = this.props;
+    const { draw } = this.state;
+    const lastElement = draw[draw.length - 1];
+
+    removeElement(lastElement);
+    this.removeLastElementInDraw();
+  }
+
+  stopDrawing() {
     const { changeMode } = this.props;
 
-    this.setState((prevState) => ({ graph: prevState.graph.slice(0, prevState.graph.length - 1) }));
-
+    this.removeLastElementInDraw();
     changeMode('none');
   }
 
-  updateCoordinatesOfLastGraphObject(pageX, pageY) {
-    const { graph } = this.state;
-    const copiedGraph = Array.from(graph);
-    const lastElement = copiedGraph[copiedGraph.length - 1];
+  updateCoordinatesOfLastDrawElement(pageX, pageY) {
+    const { draw } = this.state;
+    const copiedDraw = Array.from(draw);
+    const lastElement = copiedDraw[copiedDraw.length - 1];
 
     lastElement.coorX = utils.calculateCoorX(pageX);
     lastElement.coorY = utils.calculateCoorY(pageY);
 
-    this.setState(() => ({ graph: copiedGraph }));
+    this.setState(() => ({ draw: copiedDraw }));
   }
 
   render() {
-    const { graph } = this.state;
+    const { draw } = this.state;
 
     return (
       <div
@@ -115,7 +132,7 @@ export default class Canvas extends React.Component {
           onClick={this.canvasClick}
           onMouseMove={this.canvasMouseMove}
         >
-          {graph.map((element) => (
+          {draw.map((element) => (
             <Node
               key={`node-${element.id}`}
               node={element}
@@ -131,6 +148,7 @@ Canvas.propTypes = {
   addNode: PropTypes.func.isRequired,
   changeMode: PropTypes.func.isRequired,
   mode: PropTypes.string,
+  removeElement: PropTypes.func.isRequired,
 };
 
 Canvas.defaultProps = {
