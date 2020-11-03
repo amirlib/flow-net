@@ -7,7 +7,10 @@ const Menu = (props) => {
   const { edmondsAlgorithm } = props;
 
   return (
-    <div className={style.container}>
+    <div
+      id="menu"
+      className={style.container}
+    >
       <MenuItem
         algorithm={edmondsAlgorithm}
         text="Edmonds Karp"

@@ -14,7 +14,10 @@ const Tools = (props) => {
   } = props;
 
   return (
-    <div className={style.tools}>
+    <div
+      id="tools"
+      className={style.tools}
+    >
       <Tool
         func={newNode}
         isDisabled={nodeButtonDisabled}

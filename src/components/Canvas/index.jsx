@@ -1,6 +1,8 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import Node from '../Graphs/Node';
 import style from './canvas.module.scss';
+import utils from '../../utils';
 
 export default class Canvas extends React.Component {
   static createNodeElement(id, coorX, coorY) {
@@ -16,37 +18,97 @@ export default class Canvas extends React.Component {
   constructor(props) {
     super(props);
 
+    this.canvasClick = this.canvasClick.bind(this);
+    this.canvasMouseMove = this.canvasMouseMove.bind(this);
     this.state = {
-      flowArr: [
+      graph: [
         Canvas.createNodeElement(0, 50, 350),
         Canvas.createNodeElement(1, 700, 350),
       ],
     };
   }
 
-  componentDidUpdate() {
-    const { flowArr } = this.state;
+  componentDidUpdate(prevProps) {
+    const { mode } = this.props;
 
-    console.log(flowArr);
+    if (prevProps.mode === mode) return;
+
+    switch (mode) {
+      case 'new-node':
+        this.setNode(750, 25);
+
+        break;
+      default:
+        break;
+    }
   }
 
   setNode(coorX, coorY) {
-    const { flowArr } = this.state;
-    const node = Canvas.createNodeElement(flowArr.length, coorX, coorY);
+    const { graph } = this.state;
+    const node = Canvas.createNodeElement(graph.length, coorX, coorY);
+    const copiedGraph = Array.from(graph);
 
-    this.setState((prevState) => ({ flowArr: prevState.flowArr.push(node) }));
+    copiedGraph.push(node);
+
+    this.setState(() => ({ graph: copiedGraph }));
+  }
+
+  canvasClick(event) {
+    const { addNode, mode } = this.props;
+    const { graph } = this.state;
+    const lastElement = graph[graph.length - 1];
+
+    switch (mode) {
+      case 'new-node':
+        addNode(lastElement.id);
+
+        break;
+      default:
+        event.preventDefault();
+    }
+  }
+
+  canvasMouseMove(event) {
+    const { mode } = this.props;
+
+    switch (mode) {
+      case 'new-node':
+        this.updateCoordinatesOfLastGraphObject(event.pageX, event.pageY);
+
+        break;
+      default:
+        event.preventDefault();
+    }
+  }
+
+  updateCoordinatesOfLastGraphObject(pageX, pageY) {
+    const { graph } = this.state;
+    const copiedGraph = Array.from(graph);
+    const lastElement = copiedGraph[copiedGraph.length - 1];
+
+    lastElement.coorX = utils.calculateCoorX(pageX);
+    lastElement.coorY = utils.calculateCoorY(pageY);
+
+    this.setState(() => ({ graph: copiedGraph }));
   }
 
   render() {
-    const { flowArr } = this.state;
+    const { graph } = this.state;
 
     return (
-      <div className={style.canvas}>
-        <svg className={style.svg}>
-          {flowArr.map((obj) => (
+      <div
+        id="canvas"
+        className={style.canvas}
+      >
+        <svg
+          className={style.svg}
+          onClick={this.canvasClick}
+          onMouseMove={this.canvasMouseMove}
+        >
+          {graph.map((element) => (
             <Node
-              key={`node-${obj.id}`}
-              node={obj}
+              key={`node-${element.id}`}
+              node={element}
             />
           ))}
         </svg>
@@ -54,3 +116,12 @@ export default class Canvas extends React.Component {
     );
   }
 }
+
+Canvas.propTypes = {
+  addNode: PropTypes.func.isRequired,
+  mode: PropTypes.string,
+};
+
+Canvas.defaultProps = {
+  mode: 'none',
+};

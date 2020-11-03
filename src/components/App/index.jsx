@@ -7,24 +7,54 @@ import Header from '../Header/index';
 import Menu from '../Menu/index';
 import style from './app.module.scss';
 
-const tool = new Gca();
-
 export default class App extends React.Component {
   constructor(props) {
     super(props);
+
+    this.tool = new Gca();
+    this.graph = this.tool.CreateFlowGraph();
+    this.addNode = this.addNode.bind(this);
+    this.isUndoButtonHadToBeDisabled = this.isUndoButtonHadToBeDisabled.bind(this);
+    this.newNode = this.newNode.bind(this);
     this.state = {
-      graph: props.graph,
+      mode: props.mode,
       nodeButtonDisabled: props.nodeButtonDisabled,
       stopButtonDisabled: props.stopButtonDisabled,
       undoButtonDisabled: props.undoButtonDisabled,
     };
   }
 
+  addNode(id) {
+    this.graph.addNode(id);
+
+    this.setState(() => ({
+      mode: 'none',
+      nodeButtonDisabled: false,
+      stopButtonDisabled: true,
+      undoButtonDisabled: this.isUndoButtonHadToBeDisabled(),
+    }));
+  }
+
+  newNode() {
+    this.setState(() => ({
+      mode: 'new-node',
+      nodeButtonDisabled: true,
+      stopButtonDisabled: false,
+      undoButtonDisabled: true,
+    }));
+  }
+
+  isUndoButtonHadToBeDisabled() {
+    if (this.graph.countEdges() === 0 && this.graph.nodesID.length === 2) return true;
+
+    return false;
+  }
+
   render() {
     const title = 'Flow Networks';
     const subtitle = 'Designer';
     const {
-      graph,
+      mode,
       nodeButtonDisabled,
       stopButtonDisabled,
       undoButtonDisabled,
@@ -36,13 +66,18 @@ export default class App extends React.Component {
           title={title}
           subtitle={subtitle}
         />
-        <div className={style.container}>
+        <div
+          id="main"
+          className={style.container}
+        >
           <Menu />
           <Canvas
-            graph={graph}
+            mode={mode}
+            addNode={this.addNode}
           />
           <Tools
             nodeButtonDisabled={nodeButtonDisabled}
+            newNode={this.newNode}
             stopButtonDisabled={stopButtonDisabled}
             undoButtonDisabled={undoButtonDisabled}
           />
@@ -53,14 +88,14 @@ export default class App extends React.Component {
 }
 
 App.propTypes = {
-  graph: PropTypes.instanceOf(Gca.FlowGraph),
+  mode: PropTypes.string,
   nodeButtonDisabled: PropTypes.bool,
   stopButtonDisabled: PropTypes.bool,
   undoButtonDisabled: PropTypes.bool,
 };
 
 App.defaultProps = {
-  graph: tool.CreateFlowGraph(),
+  mode: 'none',
   nodeButtonDisabled: false,
   stopButtonDisabled: false,
   undoButtonDisabled: false,
