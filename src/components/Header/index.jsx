@@ -21,7 +21,7 @@ Header.propTypes = {
 };
 
 Header.defaultProps = {
-  subtitle: 'Designer',
+  subtitle: '',
 };
 
 export default Header;
