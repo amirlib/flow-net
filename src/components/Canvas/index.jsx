@@ -25,6 +25,7 @@ export default class Canvas extends React.Component {
     this.createEdgeElement = this.createEdgeElement.bind(this);
     this.createNodeElement = this.createNodeElement.bind(this);
     this.getNode = this.getNode.bind(this);
+    this.isNodeOnAnotherNode = this.isNodeOnAnotherNode.bind(this);
     this.removeLastElementFromGraph = this.removeLastElementFromGraph.bind(this);
     this.setEdgeEndNode = this.setEdgeEndNode.bind(this);
     this.stopDrawing = this.stopDrawing.bind(this);
@@ -109,6 +110,8 @@ export default class Canvas extends React.Component {
 
     switch (mode) {
       case 'new-node':
+        if (this.isNodeOnAnotherNode()) break;
+
         addNode(lastElement.id);
 
         break;
@@ -119,6 +122,7 @@ export default class Canvas extends React.Component {
 
         this.setEdgeEndNode();
         addEdge(lastElement.from.id, lastElement.to.id);
+
         break;
       default:
         if (this.currentNodeIdMouseHover === undefined) break;
@@ -168,6 +172,22 @@ export default class Canvas extends React.Component {
     const { draw } = this.state;
 
     return Canvas.createNodeElement(draw.length, coorX, coorY);
+  }
+
+  isNodeOnAnotherNode() {
+    const { draw } = this.state;
+    const lastElement = draw[draw.length - 1];
+    const nodes = draw.filter((obj) => obj.type === 'node' && obj !== lastElement);
+
+    return nodes.some((node) => {
+      const x = lastElement.coorX - node.coorX;
+      const y = lastElement.coorY - node.coorY;
+      const distance = utils.calculateDistance(x, y);
+
+      if (2 * node.radius >= distance) return true;
+
+      return false;
+    });
   }
 
   removeLastElementFromDraw() {

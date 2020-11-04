@@ -1,3 +1,5 @@
+const calculateDistance = (x, y) => Math.sqrt(x ** 2 + y ** 2);
+
 const getElementFullWidth = (name) => {
   const element = document.getElementById(name);
   const style = getComputedStyle(element);
@@ -21,4 +23,4 @@ const calculateCoorY = (y) => {
   return y - header.offsetHeight - marginBottom;
 };
 
-module.exports = { calculateCoorX, calculateCoorY };
+module.exports = { calculateCoorX, calculateCoorY, calculateDistance };
