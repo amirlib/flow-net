@@ -1,26 +1,26 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import nodeStyle from './node.module.scss';
+import style from './node.module.scss';
 
 const Node = (props) => {
-  // const { node, idFromNode } = props;
-  const { node } = props;
-  // const nodeMouseEnter = () => {
-  //   idFromNode(node.id);
-  // };
+  const { node, updateNodeIdWhenMouseHover } = props;
 
-  // const nodeMouseOut = () => {
-  //   idFromNode(undefined);
-  // };
+  const nodeMouseEnter = () => {
+    updateNodeIdWhenMouseHover(node.id);
+  };
 
-  // onMouseEnter = { nodeMouseEnter }
-  // onMouseOut = { nodeMouseOut }
+  const nodeMouseOut = () => {
+    updateNodeIdWhenMouseHover(undefined);
+  };
+
   return (
     <circle
-      className={nodeStyle.node}
+      className={style.node}
       cx={node.coorX}
       cy={node.coorY}
       r={node.radius}
+      onMouseEnter={nodeMouseEnter}
+      onMouseOut={nodeMouseOut}
     />
   );
 };
@@ -32,7 +32,7 @@ Node.propTypes = {
     id: PropTypes.number.isRequired,
     radius: PropTypes.number.isRequired,
   }).isRequired,
-  // idFromNode: PropTypes.func.isRequired,
+  updateNodeIdWhenMouseHover: PropTypes.func.isRequired,
 };
 
 export default Node;

@@ -13,9 +13,11 @@ export default class App extends React.Component {
 
     this.tool = new Gca();
     this.graph = this.tool.CreateFlowGraph();
+    this.addEdge = this.addEdge.bind(this);
     this.addNode = this.addNode.bind(this);
     this.changeMode = this.changeMode.bind(this);
-    this.isUndoButtonHadToBeDisabled = this.isUndoButtonHadToBeDisabled.bind(this);
+    this.hasEdge = this.hasEdge.bind(this);
+    this.isUndoButtonHadToBeDisabled = this.isUndoButtonHasToBeDisabled.bind(this);
     this.newNodeMode = this.newNodeMode.bind(this);
     this.removeElement = this.removeElement.bind(this);
     this.stopMode = this.stopMode.bind(this);
@@ -28,6 +30,17 @@ export default class App extends React.Component {
     };
   }
 
+  addEdge(from, to) {
+    this.graph.addEdge(from, to);
+
+    this.setState(() => ({
+      mode: 'none',
+      nodeButtonDisabled: false,
+      stopButtonDisabled: true,
+      undoButtonDisabled: this.isUndoButtonHasToBeDisabled(),
+    }));
+  }
+
   addNode(id) {
     this.graph.addNode(id);
 
@@ -35,15 +48,40 @@ export default class App extends React.Component {
       mode: 'none',
       nodeButtonDisabled: false,
       stopButtonDisabled: true,
-      undoButtonDisabled: this.isUndoButtonHadToBeDisabled(),
+      undoButtonDisabled: this.isUndoButtonHasToBeDisabled(),
     }));
   }
 
   changeMode(mode) {
-    this.setState(() => ({ mode }));
+    switch (mode) {
+      case 'none':
+        this.setState(() => ({
+          mode,
+          nodeButtonDisabled: false,
+          stopButtonDisabled: true,
+          undoButtonDisabled: this.isUndoButtonHasToBeDisabled(),
+        }));
+
+        break;
+      case 'new-edge':
+        this.setState(() => ({
+          mode,
+          nodeButtonDisabled: true,
+          stopButtonDisabled: false,
+          undoButtonDisabled: true,
+        }));
+
+        break;
+      default:
+        this.setState(() => ({ mode }));
+    }
   }
 
-  isUndoButtonHadToBeDisabled() {
+  hasEdge(from, to) {
+    return this.graph.hasEdge(from, to);
+  }
+
+  isUndoButtonHasToBeDisabled() {
     if (this.graph.countEdges() === 0 && this.graph.nodesID.length === 2) return true;
 
     return false;
@@ -60,6 +98,10 @@ export default class App extends React.Component {
 
   removeElement(element) {
     switch (element.type) {
+      case 'edge':
+        this.graph.deleteEdge(element.from.id, element.to.id);
+
+        break;
       case 'node':
         this.graph.deleteNode(element.id);
 
@@ -70,7 +112,7 @@ export default class App extends React.Component {
 
     this.setState(() => ({
       mode: 'none',
-      undoButtonDisabled: this.isUndoButtonHadToBeDisabled(),
+      undoButtonDisabled: this.isUndoButtonHasToBeDisabled(),
     }));
   }
 
@@ -79,7 +121,7 @@ export default class App extends React.Component {
       mode: 'stop',
       nodeButtonDisabled: false,
       stopButtonDisabled: true,
-      undoButtonDisabled: this.isUndoButtonHadToBeDisabled(),
+      undoButtonDisabled: this.isUndoButtonHasToBeDisabled(),
     }));
   }
 
@@ -110,8 +152,10 @@ export default class App extends React.Component {
           <Menu />
           <Canvas
             mode={mode}
+            addEdge={this.addEdge}
             addNode={this.addNode}
             changeMode={this.changeMode}
+            hasEdge={this.hasEdge}
             removeElement={this.removeElement}
           />
           <Tools
