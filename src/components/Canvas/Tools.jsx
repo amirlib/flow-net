@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Tool from './Tool';
+import Button from '../Buttons/Button';
 import style from './tools.module.scss';
 
 const Tools = (props) => {
@@ -18,17 +18,17 @@ const Tools = (props) => {
       id="tools"
       className={style.tools}
     >
-      <Tool
+      <Button
         func={newNode}
         isDisabled={nodeButtonDisabled}
         text="Node"
       />
-      <Tool
+      <Button
         func={stop}
         isDisabled={stopButtonDisabled}
         text="Stop"
       />
-      <Tool
+      <Button
         func={undo}
         isDisabled={undoButtonDisabled}
         text="Undo"

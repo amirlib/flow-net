@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import style from './tools.module.scss';
+import style from './buttons.module.scss';
 
-const Tool = (props) => {
+const Button = (props) => {
   const { func, isDisabled, text } = props;
 
   return (
@@ -17,10 +17,14 @@ const Tool = (props) => {
   );
 };
 
-Tool.propTypes = {
+Button.propTypes = {
   func: PropTypes.func.isRequired,
-  isDisabled: PropTypes.bool.isRequired,
+  isDisabled: PropTypes.bool,
   text: PropTypes.string.isRequired,
 };
 
-export default Tool;
+Button.defaultProps = {
+  isDisabled: false,
+};
+
+export default Button;

@@ -3,19 +3,30 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Canvas from '../Canvas/index';
 import Tools from '../Canvas/Tools';
+import EdgeWindow from '../EdgeWindow/index';
 import Header from '../Header/index';
 import Menu from '../Menu/index';
 import style from './app.module.scss';
 
 export default class App extends React.Component {
+  static createEdgeWindowData(display, from, to) {
+    return {
+      display,
+      from,
+      to,
+    };
+  }
+
   constructor(props) {
     super(props);
 
     this.tool = new Gca();
     this.graph = this.tool.CreateFlowGraph();
     this.addEdge = this.addEdge.bind(this);
+    this.addEdgeData = this.addEdgeData.bind(this);
     this.addNode = this.addNode.bind(this);
     this.changeMode = this.changeMode.bind(this);
+    this.closeEdgeWindow = this.closeEdgeWindow.bind(this);
     this.hasEdge = this.hasEdge.bind(this);
     this.isUndoButtonHadToBeDisabled = this.isUndoButtonHasToBeDisabled.bind(this);
     this.newNodeMode = this.newNodeMode.bind(this);
@@ -23,6 +34,7 @@ export default class App extends React.Component {
     this.stopMode = this.stopMode.bind(this);
     this.undoMode = this.undoMode.bind(this);
     this.state = {
+      edgeWindowData: App.createEdgeWindowData(false, -1, -1),
       mode: props.mode,
       nodeButtonDisabled: props.nodeButtonDisabled,
       stopButtonDisabled: props.stopButtonDisabled,
@@ -34,6 +46,18 @@ export default class App extends React.Component {
     this.graph.addEdge(from, to);
 
     this.setState(() => ({
+      edgeWindowData: App.createEdgeWindowData(true, from, to),
+    }));
+  }
+
+  addEdgeData(from, to, capacity, flow) {
+    const edge = this.graph.getEdge(from, to);
+
+    edge.changeCapacityTo(capacity);
+    edge.changeFlowTo(flow);
+
+    this.setState(() => ({
+      edgeWindowData: App.createEdgeWindowData(false, -1, -1),
       mode: 'none',
       nodeButtonDisabled: false,
       stopButtonDisabled: true,
@@ -75,6 +99,16 @@ export default class App extends React.Component {
       default:
         this.setState(() => ({ mode }));
     }
+  }
+
+  closeEdgeWindow() {
+    this.setState(() => ({
+      edgeWindowData: App.createEdgeWindowData(false, -1, -1),
+      mode: 'undo',
+      nodeButtonDisabled: false,
+      stopButtonDisabled: true,
+      undoButtonDisabled: this.isUndoButtonHasToBeDisabled(),
+    }));
   }
 
   hasEdge(from, to) {
@@ -133,6 +167,7 @@ export default class App extends React.Component {
     const title = 'Flow Networks';
     const subtitle = 'Designer';
     const {
+      edgeWindowData,
       mode,
       nodeButtonDisabled,
       stopButtonDisabled,
@@ -149,6 +184,11 @@ export default class App extends React.Component {
           id="main"
           className={style.container}
         >
+          <EdgeWindow
+            addEdgeData={this.addEdgeData}
+            closeEdgeWindow={this.closeEdgeWindow}
+            edgeWindowData={edgeWindowData}
+          />
           <Menu />
           <Canvas
             mode={mode}
