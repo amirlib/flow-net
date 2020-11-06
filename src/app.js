@@ -9,6 +9,7 @@ const app = React.createElement(
   {
     mode: 'none',
     nodeButtonDisabled: false,
+    resetButtonDisabled: true,
     stopButtonDisabled: true,
     undoButtonDisabled: true,
   },

@@ -7,6 +7,8 @@ const Tools = (props) => {
   const {
     newNode,
     nodeButtonDisabled,
+    reset,
+    resetButtonDisabled,
     stop,
     stopButtonDisabled,
     undo,
@@ -33,6 +35,11 @@ const Tools = (props) => {
         isDisabled={undoButtonDisabled}
         text="Undo"
       />
+      <Button
+        func={reset}
+        isDisabled={resetButtonDisabled}
+        text="Reset"
+      />
     </div>
   );
 };
@@ -40,6 +47,8 @@ const Tools = (props) => {
 Tools.propTypes = {
   newNode: PropTypes.func.isRequired,
   nodeButtonDisabled: PropTypes.bool,
+  reset: PropTypes.func.isRequired,
+  resetButtonDisabled: PropTypes.bool,
   stop: PropTypes.func.isRequired,
   stopButtonDisabled: PropTypes.bool,
   undo: PropTypes.func.isRequired,
@@ -48,6 +57,7 @@ Tools.propTypes = {
 
 Tools.defaultProps = {
   nodeButtonDisabled: false,
+  resetButtonDisabled: false,
   stopButtonDisabled: false,
   undoButtonDisabled: false,
 };

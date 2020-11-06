@@ -16,6 +16,13 @@ export default class Canvas extends React.Component {
     };
   }
 
+  static getDefaultDraw() {
+    return [
+      Canvas.createNodeElement(0, 50, 350),
+      Canvas.createNodeElement(1, 700, 350),
+    ];
+  }
+
   constructor(props) {
     super(props);
 
@@ -27,13 +34,11 @@ export default class Canvas extends React.Component {
     this.getNodeWhenMouseOn = this.getNodeWhenMouseOn.bind(this);
     this.isNodeOnAnotherNode = this.isNodeOnAnotherNode.bind(this);
     this.removeLastElementFromGraph = this.removeLastElementFromGraph.bind(this);
+    this.reset = this.reset.bind(this);
     this.setEdgeEndNode = this.setEdgeEndNode.bind(this);
     this.stopDrawing = this.stopDrawing.bind(this);
     this.state = {
-      draw: [
-        Canvas.createNodeElement(0, 50, 350),
-        Canvas.createNodeElement(1, 700, 350),
-      ],
+      draw: Canvas.getDefaultDraw(),
     };
   }
 
@@ -49,6 +54,10 @@ export default class Canvas extends React.Component {
         break;
       case 'stop':
         this.stopDrawing();
+
+        break;
+      case 'reset':
+        this.reset();
 
         break;
       case 'undo':
@@ -219,6 +228,13 @@ export default class Canvas extends React.Component {
 
     removeElement(lastElement);
     this.removeLastElementFromDraw();
+  }
+
+  reset() {
+    const { changeMode } = this.props;
+
+    this.setState(() => ({ draw: Canvas.getDefaultDraw() }));
+    changeMode('none');
   }
 
   stopDrawing() {

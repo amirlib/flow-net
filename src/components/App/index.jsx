@@ -29,15 +29,17 @@ export default class App extends React.Component {
     this.closeEdgeWindow = this.closeEdgeWindow.bind(this);
     this.edmondsKarp = this.edmondsKarp.bind(this);
     this.hasEdge = this.hasEdge.bind(this);
-    this.isUndoButtonHadToBeDisabled = this.isUndoButtonHasToBeDisabled.bind(this);
+    this.isGraphInInitiatedState = this.isGraphInInitiatedState.bind(this);
     this.newNodeMode = this.newNodeMode.bind(this);
     this.removeElement = this.removeElement.bind(this);
+    this.reset = this.reset.bind(this);
     this.stopMode = this.stopMode.bind(this);
     this.undoMode = this.undoMode.bind(this);
     this.state = {
       edgeWindowData: App.createEdgeWindowData(false, -1, -1),
       mode: props.mode,
       nodeButtonDisabled: props.nodeButtonDisabled,
+      resetButtonDisabled: props.resetButtonDisabled,
       stopButtonDisabled: props.stopButtonDisabled,
       undoButtonDisabled: props.undoButtonDisabled,
     };
@@ -61,8 +63,9 @@ export default class App extends React.Component {
       edgeWindowData: App.createEdgeWindowData(false, -1, -1),
       mode: 'none',
       nodeButtonDisabled: false,
+      resetButtonDisabled: this.isGraphInInitiatedState(),
       stopButtonDisabled: true,
-      undoButtonDisabled: this.isUndoButtonHasToBeDisabled(),
+      undoButtonDisabled: this.isGraphInInitiatedState(),
     }));
   }
 
@@ -72,8 +75,9 @@ export default class App extends React.Component {
     this.setState(() => ({
       mode: 'none',
       nodeButtonDisabled: false,
+      resetButtonDisabled: this.isGraphInInitiatedState(),
       stopButtonDisabled: true,
-      undoButtonDisabled: this.isUndoButtonHasToBeDisabled(),
+      undoButtonDisabled: this.isGraphInInitiatedState(),
     }));
   }
 
@@ -87,8 +91,9 @@ export default class App extends React.Component {
         this.setState(() => ({
           mode,
           nodeButtonDisabled: false,
+          resetButtonDisabled: this.isGraphInInitiatedState(),
           stopButtonDisabled: true,
-          undoButtonDisabled: this.isUndoButtonHasToBeDisabled(),
+          undoButtonDisabled: this.isGraphInInitiatedState(),
         }));
 
         break;
@@ -96,6 +101,7 @@ export default class App extends React.Component {
         this.setState(() => ({
           mode,
           nodeButtonDisabled: true,
+          resetButtonDisabled: true,
           stopButtonDisabled: false,
           undoButtonDisabled: true,
         }));
@@ -111,8 +117,9 @@ export default class App extends React.Component {
       edgeWindowData: App.createEdgeWindowData(false, -1, -1),
       mode: 'undo',
       nodeButtonDisabled: false,
+      resetButtonDisabled: this.isGraphInInitiatedState(),
       stopButtonDisabled: true,
-      undoButtonDisabled: this.isUndoButtonHasToBeDisabled(),
+      undoButtonDisabled: this.isGraphInInitiatedState(),
     }));
   }
 
@@ -120,7 +127,7 @@ export default class App extends React.Component {
     return this.graph.hasEdge(from, to);
   }
 
-  isUndoButtonHasToBeDisabled() {
+  isGraphInInitiatedState() {
     if (this.graph.countEdges() === 0 && this.graph.nodesID.length === 2) return true;
 
     return false;
@@ -151,7 +158,20 @@ export default class App extends React.Component {
 
     this.setState(() => ({
       mode: 'none',
+      resetButtonDisabled: this.isGraphInInitiatedState(),
       undoButtonDisabled: this.isUndoButtonHasToBeDisabled(),
+    }));
+  }
+
+  reset() {
+    this.graph = this.tool.CreateFlowGraph();
+
+    this.setState(() => ({
+      mode: 'reset',
+      nodeButtonDisabled: false,
+      resetButtonDisabled: true,
+      stopButtonDisabled: true,
+      undoButtonDisabled: true,
     }));
   }
 
@@ -159,6 +179,7 @@ export default class App extends React.Component {
     this.setState(() => ({
       mode: 'stop',
       nodeButtonDisabled: false,
+      resetButtonDisabled: this.isGraphInInitiatedState(),
       stopButtonDisabled: true,
       undoButtonDisabled: this.isUndoButtonHasToBeDisabled(),
     }));
@@ -175,10 +196,11 @@ export default class App extends React.Component {
       edgeWindowData,
       mode,
       nodeButtonDisabled,
+      resetButtonDisabled,
       stopButtonDisabled,
       undoButtonDisabled,
     } = this.state;
-
+    console.log(this.graph);
     return (
       <div>
         <Header
@@ -204,12 +226,15 @@ export default class App extends React.Component {
             removeElement={this.removeElement}
           />
           <Tools
-            nodeButtonDisabled={nodeButtonDisabled}
             newNode={this.newNodeMode}
-            stopButtonDisabled={stopButtonDisabled}
+            nodeButtonDisabled={nodeButtonDisabled}
+            reset={this.reset}
+            resetButtonDisabled={resetButtonDisabled}
             stop={this.stopMode}
-            undoButtonDisabled={undoButtonDisabled}
+            stopButtonDisabled={stopButtonDisabled}
             undo={this.undoMode}
+            undoButtonDisabled={undoButtonDisabled}
+
           />
         </div>
       </div>
@@ -220,6 +245,7 @@ export default class App extends React.Component {
 App.propTypes = {
   mode: PropTypes.string,
   nodeButtonDisabled: PropTypes.bool,
+  resetButtonDisabled: PropTypes.bool,
   stopButtonDisabled: PropTypes.bool,
   undoButtonDisabled: PropTypes.bool,
 };
@@ -227,6 +253,7 @@ App.propTypes = {
 App.defaultProps = {
   mode: 'none',
   nodeButtonDisabled: false,
+  resetButtonDisabled: false,
   stopButtonDisabled: false,
   undoButtonDisabled: false,
 };
