@@ -4,6 +4,15 @@
   display: none;
 }
 
+.notSupported {
+  display: flex;
+  color: white;
+  line-height: settings.$l-size;
+  margin: 0 auto;
+  max-width: 60rem;
+  text-align: center;
+}
+
 @media (min-width: settings.$desktop-breakpoint) {
 	.container {
     box-sizing: border-box;
@@ -12,5 +21,9 @@
     height: 75rem;
     width: 90rem;
     margin-bottom: settings.$xl-size;
-	}
+  }
+  
+  .notSupported {
+    display: none;
+  }
 }

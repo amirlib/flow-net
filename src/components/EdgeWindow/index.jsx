@@ -33,6 +33,7 @@ const EdgeWindow = (props) => {
           Please insert integer values of capacity and flow for the new edge.
         </p>
         <p>The default values are 1 for the capacity and 0 to flow.</p>
+        <p>Note that Edmonds Karp algorithm ignores flow values of the edges.</p>
 
         <div className={style.form}>
           <label

@@ -82,7 +82,7 @@ export default class App extends React.Component {
   }
 
   edmondsKarp() {
-    alert(this.tool.EdmondsKarp(this.graph));
+    alert(`The max possible flow is: ${this.tool.EdmondsKarp(this.graph)}`);
   }
 
   changeMode(mode) {
@@ -200,13 +200,19 @@ export default class App extends React.Component {
       stopButtonDisabled,
       undoButtonDisabled,
     } = this.state;
-    console.log(this.graph);
+
     return (
       <div>
         <Header
           title={title}
           subtitle={subtitle}
         />
+        <div className={style.notSupported}>
+          <p>
+            This site do not support small screens due to the inconvenience
+            of creating graphs in small screens.
+          </p>
+        </div>
         <div
           id="main"
           className={style.container}
