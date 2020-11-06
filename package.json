@@ -4,8 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "webpack --config webpack.prod.js",
-    "dev": "webpack serve --config webpack.dev.js"
+    "start": "node server/server.js",
+    "build": "webpack --config webpack.prod.js",
+    "dev": "webpack serve --config webpack.dev.js",
+    "heroku-postbuild": "npm run build"
   },
   "keywords": [],
   "author": "",
@@ -31,6 +33,7 @@
     "webpack-merge": "^5.3.0"
   },
   "dependencies": {
+    "express": "^4.17.1",
     "gca": "^3.0.0",
     "normalize.css": "^8.0.1",
     "prop-types": "^15.7.2",
