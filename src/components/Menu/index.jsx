@@ -4,7 +4,7 @@ import MenuItem from './MenuItem';
 import style from './menu.module.scss';
 
 const Menu = (props) => {
-  const { edmondsAlgorithm } = props;
+  const { edmondsKarp } = props;
 
   return (
     <div
@@ -12,7 +12,7 @@ const Menu = (props) => {
       className={style.container}
     >
       <MenuItem
-        algorithm={edmondsAlgorithm}
+        algorithm={edmondsKarp}
         text="Edmonds Karp"
       />
     </div>
@@ -20,7 +20,7 @@ const Menu = (props) => {
 };
 
 Menu.propTypes = {
-  edmondsAlgorithm: PropTypes.func.isRequired,
+  edmondsKarp: PropTypes.func.isRequired,
 };
 
 export default Menu;

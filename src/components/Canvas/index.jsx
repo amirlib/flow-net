@@ -19,17 +19,16 @@ export default class Canvas extends React.Component {
   constructor(props) {
     super(props);
 
-    this.currentNodeIdMouseHover = undefined;
     this.canvasClick = this.canvasClick.bind(this);
     this.canvasMouseMove = this.canvasMouseMove.bind(this);
     this.createEdgeElement = this.createEdgeElement.bind(this);
     this.createNodeElement = this.createNodeElement.bind(this);
     this.getNode = this.getNode.bind(this);
+    this.getNodeWhenMouseOn = this.getNodeWhenMouseOn.bind(this);
     this.isNodeOnAnotherNode = this.isNodeOnAnotherNode.bind(this);
     this.removeLastElementFromGraph = this.removeLastElementFromGraph.bind(this);
     this.setEdgeEndNode = this.setEdgeEndNode.bind(this);
     this.stopDrawing = this.stopDrawing.bind(this);
-    this.updateNodeIdWhenMouseHover = this.updateNodeIdWhenMouseHover.bind(this);
     this.state = {
       draw: [
         Canvas.createNodeElement(0, 50, 350),
@@ -67,8 +66,26 @@ export default class Canvas extends React.Component {
     return draw.find((node) => node.id === id);
   }
 
-  setEdge() {
-    const startNode = this.getNode(this.currentNodeIdMouseHover);
+  getNodeWhenMouseOn(x, y) {
+    const { draw } = this.state;
+    const coorX = utils.calculateCoorX(x);
+    const coorY = utils.calculateCoorY(y);
+
+    return draw.find((element) => {
+      if (element.type !== 'node') return false;
+
+      const xDistance = coorX - element.coorX;
+      const yDistance = coorY - element.coorY;
+      const distance = utils.calculateDistance(xDistance, yDistance);
+
+      if (element.radius >= distance) return true;
+
+      return false;
+    });
+  }
+
+  setEdge(x, y) {
+    const startNode = this.getNodeWhenMouseOn(x, y);
     const edge = this.createEdgeElement(
       startNode.id,
       startNode.coorX,
@@ -81,12 +98,12 @@ export default class Canvas extends React.Component {
     this.setState((prevState) => ({ draw: prevState.draw.concat([edge]) }));
   }
 
-  setEdgeEndNode() {
+  setEdgeEndNode(id) {
     const { draw } = this.state;
     const copiedDraw = Array.from(draw);
     const lastElement = copiedDraw[copiedDraw.length - 1];
 
-    lastElement.to.id = this.currentNodeIdMouseHover;
+    lastElement.to.id = id;
 
     this.setState(() => ({ draw: copiedDraw }));
   }
@@ -97,7 +114,7 @@ export default class Canvas extends React.Component {
     this.setState((prevState) => ({ draw: prevState.draw.concat([node]) }));
   }
 
-  canvasClick() {
+  canvasClick(event) {
     const {
       addEdge,
       addNode,
@@ -107,6 +124,7 @@ export default class Canvas extends React.Component {
     } = this.props;
     const { draw } = this.state;
     const lastElement = draw[draw.length - 1];
+    const nodeMouseOn = this.getNodeWhenMouseOn(event.pageX, event.pageY);
 
     switch (mode) {
       case 'new-node':
@@ -116,18 +134,18 @@ export default class Canvas extends React.Component {
 
         break;
       case 'new-edge':
-        if (this.currentNodeIdMouseHover === undefined) break;
-        if (lastElement.from.id === this.currentNodeIdMouseHover) break;
-        if (hasEdge(lastElement.from.id, this.currentNodeIdMouseHover)) break;
+        if (nodeMouseOn === undefined) break;
+        if (lastElement.from.id === nodeMouseOn.id) break;
+        if (hasEdge(lastElement.from.id, nodeMouseOn.id)) break;
 
-        this.setEdgeEndNode();
+        this.setEdgeEndNode(nodeMouseOn.id);
         addEdge(lastElement.from.id, lastElement.to.id);
 
         break;
       default:
-        if (this.currentNodeIdMouseHover === undefined) break;
+        if (nodeMouseOn.id === -1) break;
 
-        this.setEdge();
+        this.setEdge(event.pageX, event.pageY);
         changeMode('new-edge');
     }
   }
@@ -145,7 +163,7 @@ export default class Canvas extends React.Component {
 
         break;
       default:
-        event.preventDefault();
+        break;
     }
   }
 
@@ -233,10 +251,6 @@ export default class Canvas extends React.Component {
     this.setState(() => ({ draw: copiedDraw }));
   }
 
-  updateNodeIdWhenMouseHover(id) {
-    this.currentNodeIdMouseHover = id;
-  }
-
   render() {
     const { draw } = this.state;
 
@@ -272,7 +286,7 @@ export default class Canvas extends React.Component {
                 <Node
                   key={`node-${element.id}`}
                   node={element}
-                  updateNodeIdWhenMouseHover={this.updateNodeIdWhenMouseHover}
+                  updateCurrentNodeIdMouseHover={this.updateCurrentNodeIdMouseHover}
                 />
               );
             }

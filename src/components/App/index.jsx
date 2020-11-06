@@ -27,6 +27,7 @@ export default class App extends React.Component {
     this.addNode = this.addNode.bind(this);
     this.changeMode = this.changeMode.bind(this);
     this.closeEdgeWindow = this.closeEdgeWindow.bind(this);
+    this.edmondsKarp = this.edmondsKarp.bind(this);
     this.hasEdge = this.hasEdge.bind(this);
     this.isUndoButtonHadToBeDisabled = this.isUndoButtonHasToBeDisabled.bind(this);
     this.newNodeMode = this.newNodeMode.bind(this);
@@ -74,6 +75,10 @@ export default class App extends React.Component {
       stopButtonDisabled: true,
       undoButtonDisabled: this.isUndoButtonHasToBeDisabled(),
     }));
+  }
+
+  edmondsKarp() {
+    alert(this.tool.EdmondsKarp(this.graph));
   }
 
   changeMode(mode) {
@@ -189,7 +194,7 @@ export default class App extends React.Component {
             closeEdgeWindow={this.closeEdgeWindow}
             edgeWindowData={edgeWindowData}
           />
-          <Menu />
+          <Menu edmondsKarp={this.edmondsKarp} />
           <Canvas
             mode={mode}
             addEdge={this.addEdge}

@@ -3,15 +3,7 @@ import PropTypes from 'prop-types';
 import style from './node.module.scss';
 
 const Node = (props) => {
-  const { node, updateNodeIdWhenMouseHover } = props;
-
-  const nodeMouseEnter = () => {
-    updateNodeIdWhenMouseHover(node.id);
-  };
-
-  const nodeMouseOut = () => {
-    updateNodeIdWhenMouseHover(undefined);
-  };
+  const { node } = props;
 
   return (
     <circle
@@ -19,8 +11,6 @@ const Node = (props) => {
       cx={node.coorX}
       cy={node.coorY}
       r={node.radius}
-      onMouseEnter={nodeMouseEnter}
-      onMouseOut={nodeMouseOut}
     />
   );
 };
@@ -32,7 +22,6 @@ Node.propTypes = {
     id: PropTypes.number.isRequired,
     radius: PropTypes.number.isRequired,
   }).isRequired,
-  updateNodeIdWhenMouseHover: PropTypes.func.isRequired,
 };
 
 export default Node;
