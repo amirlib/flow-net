@@ -159,7 +159,7 @@ export default class App extends React.Component {
     this.setState(() => ({
       mode: 'none',
       resetButtonDisabled: this.isGraphInInitiatedState(),
-      undoButtonDisabled: this.isUndoButtonHasToBeDisabled(),
+      undoButtonDisabled: this.isGraphInInitiatedState(),
     }));
   }
 
@@ -181,7 +181,7 @@ export default class App extends React.Component {
       nodeButtonDisabled: false,
       resetButtonDisabled: this.isGraphInInitiatedState(),
       stopButtonDisabled: true,
-      undoButtonDisabled: this.isUndoButtonHasToBeDisabled(),
+      undoButtonDisabled: this.isGraphInInitiatedState(),
     }));
   }
 
