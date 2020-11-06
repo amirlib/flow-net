@@ -152,7 +152,7 @@ export default class Canvas extends React.Component {
 
         break;
       default:
-        if (nodeMouseOn.id === -1) break;
+        if (nodeMouseOn === undefined) break;
 
         this.setEdge(event.pageX, event.pageY);
         changeMode('new-edge');
