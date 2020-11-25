@@ -8,8 +8,34 @@ export default class EdgeWindow extends React.Component {
   constructor(props) {
     super(props);
 
+    this.onCapacityChange = this.onCapacityChange.bind(this);
+    this.onFlowChange = this.onFlowChange.bind(this);
     this.parseDisplayValue = this.parseDisplayValue.bind(this);
     this.updateEdgeData = this.updateEdgeData.bind(this);
+    this.state = {
+      capacity: 1,
+      flow: 0,
+    };
+  }
+
+  onCapacityChange(e) {
+    const capacity = e.target.value;
+
+    if (!capacity) {
+      this.setState(() => ({ capacity: 1 }));
+    } else if (capacity.match(/^\d{1,}$/)) {
+      this.setState(() => ({ capacity: parseInt(capacity, 10) }));
+    }
+  }
+
+  onFlowChange(e) {
+    const flow = e.target.value;
+
+    if (!flow) {
+      this.setState(() => ({ flow: 0 }));
+    } else if (flow.match(/^\d{1,}$/)) {
+      this.setState(() => ({ flow: parseInt(flow, 10) }));
+    }
   }
 
   parseDisplayValue() {
@@ -22,18 +48,19 @@ export default class EdgeWindow extends React.Component {
 
   updateEdgeData() {
     const { addEdgeData, edgeWindowData } = this.props;
-
-    let capacity = parseInt(document.getElementById('capacity').value, 10);
-    let flow = parseInt(document.getElementById('flow').value, 10);
-
-    if (Number.isNaN(capacity) || capacity < 0) capacity = 1;
-    if (Number.isNaN(flow)) flow = 0;
+    const { capacity, flow } = this.state;
 
     addEdgeData(edgeWindowData.from, edgeWindowData.to, capacity, flow);
+
+    this.setState(() => ({
+      capacity: 1,
+      flow: 0,
+    }));
   }
 
   render() {
     const { closeEdgeWindow } = this.props;
+    const { capacity, flow } = this.state;
 
     return (
       <div
@@ -58,7 +85,9 @@ export default class EdgeWindow extends React.Component {
               alt="capacity"
               className={style.input}
               id="capacity"
+              onChange={this.onCapacityChange}
               type="text"
+              value={capacity}
             />
           </div>
 
@@ -70,10 +99,12 @@ export default class EdgeWindow extends React.Component {
               Flow
             </label>
             <input
-              className={style.input}
-              type="number"
-              id="flow"
               alt="flow"
+              className={style.input}
+              onChange={this.onFlowChange}
+              id="flow"
+              type="text"
+              value={flow}
             />
           </div>
 

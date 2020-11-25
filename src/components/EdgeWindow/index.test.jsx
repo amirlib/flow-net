@@ -1,30 +1,69 @@
 import React from 'react';
-import { render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import EdgeWindow from './index';
 import edgeData from '../../../test/fixtures/edgeWindowData';
 
 let addEdgeDataMock;
 let closeEdgeWindowMock;
-let wrapper;
-let utils;
+let component;
 
 beforeEach(() => {
   addEdgeDataMock = jest.fn();
   closeEdgeWindowMock = jest.fn();
-  wrapper = (
+  component = (
     <EdgeWindow
       addEdgeData={addEdgeDataMock}
       closeEdgeWindow={closeEdgeWindowMock}
       edgeWindowData={edgeData}
     />
   );
-  utils = render(wrapper);
+});
+
+test('should set capacity if valid input', () => {
+  render(component);
+
+  const capacity = 2;
+  const input = screen.getByLabelText('Capacity');
+
+  fireEvent.change(input, { target: { value: capacity } });
+  expect(input.value).toBe(`${capacity}`);
+});
+
+test('should not set capacity if invalid input', () => {
+  render(component);
+
+  const capacity = 2.5;
+  const input = screen.getByLabelText('Capacity');
+
+  fireEvent.change(input, { target: { value: capacity } });
+  expect(input.value).toBe('1');
+});
+
+test('should set flow if valid input', () => {
+  render(component);
+
+  const flow = 2;
+  const input = screen.getByLabelText('Flow');
+
+  fireEvent.change(input, { target: { value: flow } });
+  expect(input.value).toBe(`${flow}`);
+});
+
+test('should not set flow if invalid input', () => {
+  render(component);
+
+  const flow = 2.5;
+  const input = screen.getByLabelText('Flow');
+
+  fireEvent.change(input, { target: { value: flow } });
+  expect(input.value).toBe('0');
 });
 
 test('should call addEdgeData method with default values', () => {
-  const { getByRole } = utils;
-  const button = getByRole('button', { name: 'Create' });
+  render(component);
+
+  const button = screen.getByRole('button', { name: 'Create' });
 
   userEvent.click(button);
   expect(addEdgeDataMock).toHaveBeenLastCalledWith(
@@ -36,13 +75,14 @@ test('should call addEdgeData method with default values', () => {
 });
 
 test('should call addEdgeData method with alt values', () => {
-  const { getByLabelText, getByRole } = utils;
-  const capacityInput = getByLabelText('Capacity');
-  const flowInput = getByLabelText('Flow');
-  const button = getByRole('button', { name: 'Create' });
+  render(component);
 
-  userEvent.type(capacityInput, '2');
-  userEvent.type(flowInput, '1');
+  const capacityInput = screen.getByLabelText('Capacity');
+  const flowInput = screen.getByLabelText('Flow');
+  const button = screen.getByRole('button', { name: 'Create' });
+
+  fireEvent.change(capacityInput, { target: { value: 2 } });
+  fireEvent.change(flowInput, { target: { value: 1 } });
   userEvent.click(button);
   expect(addEdgeDataMock).toHaveBeenLastCalledWith(
     edgeData.from,
