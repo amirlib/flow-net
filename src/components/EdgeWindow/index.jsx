@@ -69,16 +69,12 @@ const EdgeWindow = (props) => {
           <Button
             func={updateEdgeData}
             text="Create"
-          >
-            Create
-          </Button>
+          />
 
           <Button
             func={closeEdgeWindow}
             text="Cancel"
-          >
-            Cancel
-          </Button>
+          />
         </div>
       </div>
     </div>
