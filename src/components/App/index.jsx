@@ -1,6 +1,5 @@
 import Gca from 'gca';
 import React from 'react';
-import PropTypes from 'prop-types';
 import Canvas from '../Canvas/index';
 import Tools from '../Canvas/Tools';
 import EdgeWindow from '../EdgeWindow/index';
@@ -37,11 +36,11 @@ export default class App extends React.Component {
     this.undoMode = this.undoMode.bind(this);
     this.state = {
       edgeWindowData: App.createEdgeWindowData(false, -1, -1),
-      mode: props.mode,
-      nodeButtonDisabled: props.nodeButtonDisabled,
-      resetButtonDisabled: props.resetButtonDisabled,
-      stopButtonDisabled: props.stopButtonDisabled,
-      undoButtonDisabled: props.undoButtonDisabled,
+      mode: 'none',
+      nodeButtonDisabled: false,
+      resetButtonDisabled: true,
+      stopButtonDisabled: true,
+      undoButtonDisabled: true,
     };
   }
 
@@ -137,6 +136,7 @@ export default class App extends React.Component {
     this.setState(() => ({
       mode: 'new-node',
       nodeButtonDisabled: true,
+      resetButtonDisabled: true,
       stopButtonDisabled: false,
       undoButtonDisabled: true,
     }));
@@ -247,19 +247,3 @@ export default class App extends React.Component {
     );
   }
 }
-
-App.propTypes = {
-  mode: PropTypes.string,
-  nodeButtonDisabled: PropTypes.bool,
-  resetButtonDisabled: PropTypes.bool,
-  stopButtonDisabled: PropTypes.bool,
-  undoButtonDisabled: PropTypes.bool,
-};
-
-App.defaultProps = {
-  mode: 'none',
-  nodeButtonDisabled: false,
-  resetButtonDisabled: false,
-  stopButtonDisabled: false,
-  undoButtonDisabled: false,
-};
