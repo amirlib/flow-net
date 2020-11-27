@@ -240,7 +240,6 @@ export default class App extends React.Component {
             stopButtonDisabled={stopButtonDisabled}
             undo={this.undoMode}
             undoButtonDisabled={undoButtonDisabled}
-
           />
         </div>
       </div>
