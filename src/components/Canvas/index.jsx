@@ -5,25 +5,26 @@ import Node from '../Graphs/Node';
 import style from './canvas.module.scss';
 import utils from '../../utils';
 
-const getDefaultDraw = () => [
-  {
-    id: 0,
-    coorX: 50,
-    coorY: 350,
-    radius: 25,
-    type: 'node',
-  },
-  {
-    id: 1,
-    coorX: 700,
-    coorY: 350,
-    radius: 25,
-    type: 'node',
-  },
-];
-
 const Canvas = (props) => {
   const { mode } = props;
+
+  const getDefaultDraw = () => [
+    {
+      id: 0,
+      coorX: 50,
+      coorY: 350,
+      radius: 25,
+      type: 'node',
+    },
+    {
+      id: 1,
+      coorX: 700,
+      coorY: 350,
+      radius: 25,
+      type: 'node',
+    },
+  ];
+
   const [draw, setDraw] = useState(getDefaultDraw());
 
   const createEdgeElement = (fromId, startX, startY, toId, endX, endY) => ({
