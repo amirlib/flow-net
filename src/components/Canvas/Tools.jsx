@@ -1,19 +1,51 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import Button from '../Buttons/Button';
 import style from './tools.module.scss';
 
 const Tools = (props) => {
   const {
-    newNode,
-    nodeButtonDisabled,
+    changeMode,
+    isGraphInInitiatedState,
+    mode,
     reset,
-    resetButtonDisabled,
-    stop,
-    stopButtonDisabled,
-    undo,
-    undoButtonDisabled,
   } = props;
+  const [nodeButtonDisabled, setNodeButtonDisabled] = useState(false);
+  const [resetButtonDisabled, setResetButtonDisabled] = useState(true);
+  const [stopButtonDisabled, setStopButtonDisabled] = useState(true);
+  const [undoButtonDisabled, setUndoButtonDisabled] = useState(true);
+
+  useEffect(() => {
+    switch (mode) {
+      case 'new-edge':
+      case 'new-node':
+        setNodeButtonDisabled(true);
+        setResetButtonDisabled(true);
+        setStopButtonDisabled(false);
+        setUndoButtonDisabled(true);
+
+        break;
+      case 'reset':
+        reset();
+        setNodeButtonDisabled(false);
+        setResetButtonDisabled(true);
+        setStopButtonDisabled(true);
+        setUndoButtonDisabled(true);
+
+        break;
+      case 'none':
+      case 'stop':
+      case 'undo':
+        setNodeButtonDisabled(false);
+        setResetButtonDisabled(isGraphInInitiatedState());
+        setStopButtonDisabled(true);
+        setUndoButtonDisabled(isGraphInInitiatedState());
+
+        break;
+      default:
+        break;
+    }
+  }, [mode]);
 
   return (
     <div
@@ -21,22 +53,22 @@ const Tools = (props) => {
       className={style.tools}
     >
       <Button
-        func={newNode}
+        func={() => changeMode('new-node')}
         isDisabled={nodeButtonDisabled}
         text="Node"
       />
       <Button
-        func={stop}
+        func={() => changeMode('stop')}
         isDisabled={stopButtonDisabled}
         text="Stop"
       />
       <Button
-        func={undo}
+        func={() => changeMode('undo')}
         isDisabled={undoButtonDisabled}
         text="Undo"
       />
       <Button
-        func={reset}
+        func={() => changeMode('reset')}
         isDisabled={resetButtonDisabled}
         text="Reset"
       />
@@ -45,21 +77,14 @@ const Tools = (props) => {
 };
 
 Tools.propTypes = {
-  newNode: PropTypes.func.isRequired,
-  nodeButtonDisabled: PropTypes.bool,
+  changeMode: PropTypes.func.isRequired,
+  isGraphInInitiatedState: PropTypes.func.isRequired,
+  mode: PropTypes.string,
   reset: PropTypes.func.isRequired,
-  resetButtonDisabled: PropTypes.bool,
-  stop: PropTypes.func.isRequired,
-  stopButtonDisabled: PropTypes.bool,
-  undo: PropTypes.func.isRequired,
-  undoButtonDisabled: PropTypes.bool,
 };
 
 Tools.defaultProps = {
-  nodeButtonDisabled: false,
-  resetButtonDisabled: false,
-  stopButtonDisabled: false,
-  undoButtonDisabled: false,
+  mode: 'none',
 };
 
 export default Tools;
