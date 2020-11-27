@@ -1,82 +1,55 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import Edge from '../Graphs/Edge';
 import Node from '../Graphs/Node';
 import style from './canvas.module.scss';
 import utils from '../../utils';
 
-export default class Canvas extends React.Component {
-  static createNodeElement(id, coorX, coorY) {
-    return {
-      id,
-      coorX,
-      coorY,
-      radius: 25,
-      type: 'node',
-    };
-  }
+const getDefaultDraw = () => [
+  {
+    id: 0,
+    coorX: 50,
+    coorY: 350,
+    radius: 25,
+    type: 'node',
+  },
+  {
+    id: 1,
+    coorX: 700,
+    coorY: 350,
+    radius: 25,
+    type: 'node',
+  },
+];
 
-  static getDefaultDraw() {
-    return [
-      Canvas.createNodeElement(0, 50, 350),
-      Canvas.createNodeElement(1, 700, 350),
-    ];
-  }
+const Canvas = (props) => {
+  const { mode } = props;
+  const [draw, setDraw] = useState(getDefaultDraw());
 
-  constructor(props) {
-    super(props);
+  const createEdgeElement = (fromId, startX, startY, toId, endX, endY) => ({
+    id: draw.length,
+    from: {
+      id: fromId,
+      coorX: startX,
+      coorY: startY,
+    },
+    to: {
+      id: toId,
+      coorX: endX,
+      coorY: endY,
+    },
+    type: 'edge',
+  });
 
-    this.canvasClick = this.canvasClick.bind(this);
-    this.canvasMouseMove = this.canvasMouseMove.bind(this);
-    this.createEdgeElement = this.createEdgeElement.bind(this);
-    this.createNodeElement = this.createNodeElement.bind(this);
-    this.getNode = this.getNode.bind(this);
-    this.getNodeWhenMouseOn = this.getNodeWhenMouseOn.bind(this);
-    this.isNodeOnAnotherNode = this.isNodeOnAnotherNode.bind(this);
-    this.removeLastElementFromGraph = this.removeLastElementFromGraph.bind(this);
-    this.reset = this.reset.bind(this);
-    this.setEdgeEndNode = this.setEdgeEndNode.bind(this);
-    this.stopDrawing = this.stopDrawing.bind(this);
-    this.state = {
-      draw: Canvas.getDefaultDraw(),
-    };
-  }
+  const createNodeElement = (coorX, coorY) => ({
+    id: draw.length,
+    coorX,
+    coorY,
+    radius: 25,
+    type: 'node',
+  });
 
-  componentDidUpdate(prevProps) {
-    const { mode } = this.props;
-
-    if (prevProps.mode === mode) return;
-
-    switch (mode) {
-      case 'new-node':
-        this.setNode(750, 25);
-
-        break;
-      case 'stop':
-        this.stopDrawing();
-
-        break;
-      case 'reset':
-        this.reset();
-
-        break;
-      case 'undo':
-        this.removeLastElementFromGraph();
-
-        break;
-      default:
-        break;
-    }
-  }
-
-  getNode(id) {
-    const { draw } = this.state;
-
-    return draw.find((node) => node.id === id);
-  }
-
-  getNodeWhenMouseOn(x, y) {
-    const { draw } = this.state;
+  const getNodeWhenMouseOn = (x, y) => {
     const coorX = utils.calculateCoorX(x);
     const coorY = utils.calculateCoorY(y);
 
@@ -91,11 +64,11 @@ export default class Canvas extends React.Component {
 
       return false;
     });
-  }
+  };
 
-  setEdge(x, y) {
-    const startNode = this.getNodeWhenMouseOn(x, y);
-    const edge = this.createEdgeElement(
+  const setEdge = (x, y) => {
+    const startNode = getNodeWhenMouseOn(x, y);
+    const edge = createEdgeElement(
       startNode.id,
       startNode.coorX,
       startNode.coorY,
@@ -104,105 +77,25 @@ export default class Canvas extends React.Component {
       startNode.coorY,
     );
 
-    this.setState((prevState) => ({ draw: prevState.draw.concat([edge]) }));
-  }
+    setDraw(draw.concat([edge]));
+  };
 
-  setEdgeEndNode(id) {
-    const { draw } = this.state;
+  const setEdgeEndNode = (id) => {
     const copiedDraw = Array.from(draw);
     const lastElement = copiedDraw[copiedDraw.length - 1];
 
     lastElement.to.id = id;
 
-    this.setState(() => ({ draw: copiedDraw }));
-  }
+    setDraw(copiedDraw);
+  };
 
-  setNode(coorX, coorY) {
-    const node = this.createNodeElement(coorX, coorY);
+  const setNode = (coorX, coorY) => {
+    const node = createNodeElement(coorX, coorY);
 
-    this.setState((prevState) => ({ draw: prevState.draw.concat([node]) }));
-  }
+    setDraw(draw.concat([node]));
+  };
 
-  canvasClick(event) {
-    const {
-      addEdge,
-      addNode,
-      changeMode,
-      hasEdge,
-      mode,
-    } = this.props;
-    const { draw } = this.state;
-    const lastElement = draw[draw.length - 1];
-    const nodeMouseOn = this.getNodeWhenMouseOn(event.pageX, event.pageY);
-
-    switch (mode) {
-      case 'new-node':
-        if (this.isNodeOnAnotherNode()) break;
-
-        addNode(lastElement.id);
-
-        break;
-      case 'new-edge':
-        if (nodeMouseOn === undefined) break;
-        if (lastElement.from.id === nodeMouseOn.id) break;
-        if (hasEdge(lastElement.from.id, nodeMouseOn.id)) break;
-
-        this.setEdgeEndNode(nodeMouseOn.id);
-        addEdge(lastElement.from.id, lastElement.to.id);
-
-        break;
-      default:
-        if (nodeMouseOn === undefined) break;
-
-        this.setEdge(event.pageX, event.pageY);
-        changeMode('new-edge');
-    }
-  }
-
-  canvasMouseMove(event) {
-    const { mode } = this.props;
-
-    switch (mode) {
-      case 'new-node':
-        this.updateCoordinatesOfLastDrawElement(event.pageX, event.pageY);
-
-        break;
-      case 'new-edge':
-        this.updateCoordinatesOfLastDrawElement(event.pageX, event.pageY);
-
-        break;
-      default:
-        break;
-    }
-  }
-
-  createEdgeElement(fromId, startX, startY, toId, endX, endY) {
-    const { draw } = this.state;
-
-    return {
-      id: draw.length,
-      from: {
-        id: fromId,
-        coorX: startX,
-        coorY: startY,
-      },
-      to: {
-        id: toId,
-        coorX: endX,
-        coorY: endY,
-      },
-      type: 'edge',
-    };
-  }
-
-  createNodeElement(coorX, coorY) {
-    const { draw } = this.state;
-
-    return Canvas.createNodeElement(draw.length, coorX, coorY);
-  }
-
-  isNodeOnAnotherNode() {
-    const { draw } = this.state;
+  const isNodeOnAnotherNode = () => {
     const lastElement = draw[draw.length - 1];
     const nodes = draw.filter((obj) => obj.type === 'node' && obj !== lastElement);
 
@@ -215,37 +108,43 @@ export default class Canvas extends React.Component {
 
       return false;
     });
-  }
+  };
 
-  removeLastElementFromDraw() {
-    this.setState((prevState) => ({ draw: prevState.draw.slice(0, prevState.draw.length - 1) }));
-  }
-
-  removeLastElementFromGraph() {
-    const { removeElement } = this.props;
-    const { draw } = this.state;
+  const canvasClick = (event) => {
+    const {
+      addEdge,
+      addNode,
+      changeMode,
+      hasEdge,
+    } = props;
     const lastElement = draw[draw.length - 1];
+    const nodeMouseOn = getNodeWhenMouseOn(event.pageX, event.pageY);
 
-    removeElement(lastElement);
-    this.removeLastElementFromDraw();
-  }
+    switch (mode) {
+      case 'new-node':
+        if (isNodeOnAnotherNode()) break;
 
-  reset() {
-    const { changeMode } = this.props;
+        addNode(lastElement.id);
 
-    this.setState(() => ({ draw: Canvas.getDefaultDraw() }));
-    changeMode('none');
-  }
+        break;
+      case 'new-edge':
+        if (nodeMouseOn === undefined) break;
+        if (lastElement.from.id === nodeMouseOn.id) break;
+        if (hasEdge(lastElement.from.id, nodeMouseOn.id)) break;
 
-  stopDrawing() {
-    const { changeMode } = this.props;
+        setEdgeEndNode(nodeMouseOn.id);
+        addEdge(lastElement.from.id, lastElement.to.id);
 
-    this.removeLastElementFromDraw();
-    changeMode('none');
-  }
+        break;
+      default:
+        if (nodeMouseOn === undefined) break;
 
-  updateCoordinatesOfLastDrawElement(pageX, pageY) {
-    const { draw } = this.state;
+        setEdge(event.pageX, event.pageY);
+        changeMode('new-edge');
+    }
+  };
+
+  const updateCoordinatesOfLastDrawElement = (pageX, pageY) => {
     const copiedDraw = Array.from(draw);
     const lastElement = copiedDraw[copiedDraw.length - 1];
 
@@ -264,61 +163,117 @@ export default class Canvas extends React.Component {
         break;
     }
 
-    this.setState(() => ({ draw: copiedDraw }));
-  }
+    setDraw(copiedDraw);
+  };
 
-  render() {
-    const { draw } = this.state;
+  const canvasMouseMove = (event) => {
+    switch (mode) {
+      case 'new-edge':
+      case 'new-node':
+        updateCoordinatesOfLastDrawElement(event.pageX, event.pageY);
 
-    return (
-      <div
-        id="canvas"
-        className={style.canvas}
+        break;
+      default:
+        break;
+    }
+  };
+
+  const removeLastElementFromDraw = () => {
+    setDraw(draw.slice(0, draw.length - 1));
+  };
+
+  const removeLastElementFromGraph = () => {
+    const { removeElement } = props;
+    const lastElement = draw[draw.length - 1];
+
+    removeElement(lastElement);
+    removeLastElementFromDraw();
+  };
+
+  const reset = () => {
+    const { changeMode } = props;
+
+    setDraw(getDefaultDraw());
+    changeMode('none');
+  };
+
+  const stopDrawing = () => {
+    const { changeMode } = props;
+
+    removeLastElementFromDraw();
+    changeMode('none');
+  };
+
+  useEffect(() => {
+    switch (mode) {
+      case 'new-node':
+        setNode(750, 25);
+
+        break;
+      case 'stop':
+        stopDrawing();
+
+        break;
+      case 'reset':
+        reset();
+
+        break;
+      case 'undo':
+        removeLastElementFromGraph();
+
+        break;
+      default:
+        break;
+    }
+  }, [mode]);
+
+  return (
+    <div
+      id="canvas"
+      className={style.canvas}
+    >
+      <svg
+        className={style.svg}
+        onClick={canvasClick}
+        onMouseMove={canvasMouseMove}
       >
-        <svg
-          className={style.svg}
-          onClick={this.canvasClick}
-          onMouseMove={this.canvasMouseMove}
-        >
-          <defs>
-            <marker
-              id="arrow"
-              markerWidth="13"
-              markerHeight="13"
-              refX="0.1"
-              refY="6"
-              orient="auto"
-            >
-              <path
-                d="M2,2 L2,13 L8,7 L2,2"
-                style={{ fill: 'red' }}
-              />
-            </marker>
-          </defs>
+        <defs>
+          <marker
+            id="arrow"
+            markerWidth="13"
+            markerHeight="13"
+            refX="0.1"
+            refY="6"
+            orient="auto"
+          >
+            <path
+              d="M2,2 L2,13 L8,7 L2,2"
+              style={{ fill: 'red' }}
+            />
+          </marker>
+        </defs>
 
-          {draw.map((element) => {
-            if (element.type === 'node') {
-              return (
-                <Node
-                  key={`node-${element.id}`}
-                  node={element}
-                  updateCurrentNodeIdMouseHover={this.updateCurrentNodeIdMouseHover}
-                />
-              );
-            }
-
+        {draw.map((element) => {
+          if (element.type === 'node') {
             return (
-              <Edge
-                key={`edge-${element.id}`}
-                edge={element}
+              <Node
+                key={`node-${element.id}`}
+                node={element}
               />
             );
-          })}
-        </svg>
-      </div>
-    );
-  }
-}
+          }
+
+          return (
+            <Edge
+              key={`edge-${element.id}`}
+              edge={element}
+            />
+          );
+        })}
+      </svg>
+    </div>
+  );
+};
 
 Canvas.propTypes = {
   addEdge: PropTypes.func.isRequired,
@@ -332,3 +287,5 @@ Canvas.propTypes = {
 Canvas.defaultProps = {
   mode: 'none',
 };
+
+export default Canvas;
