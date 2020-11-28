@@ -1,10 +1,12 @@
 import Gca from 'gca';
-import React, { useState } from 'react';
+import React, { useReducer, useState } from 'react';
 import Canvas from '../Canvas/index';
 import Tools from '../Canvas/Tools';
 import EdgeWindow from '../EdgeWindow/index';
 import Header from '../Header/index';
 import Menu from '../Menu/index';
+import * as graphActions from '../../actions/graph';
+import graphReducer from '../../reducers/graph';
 import style from './app.module.scss';
 
 const App = () => {
@@ -16,15 +18,13 @@ const App = () => {
 
   const tool = new Gca();
   const getDefaultEdgeWindowData = () => createEdgeWindowData(false, -1, -1);
-  const getDefaultGraph = () => tool.CreateFlowGraph();
   const getDefaultMode = () => 'none';
 
+  const [graph, graphDispatch] = useReducer(graphReducer, tool.CreateFlowGraph());
   const [edgeWindowData, setEdgeWindowObject] = useState(getDefaultEdgeWindowData());
-  const [graph, setGraph] = useState(getDefaultGraph());
   const [mode, setMode] = useState(getDefaultMode());
 
   const setDefaultEdgeWindowData = () => setEdgeWindowObject(getDefaultEdgeWindowData());
-  const setDefaultGraph = () => setGraph(getDefaultGraph());
   const setDefaultMode = () => setMode(getDefaultMode());
 
   const setEdgeWindowData = (display, from, to) => (
@@ -32,24 +32,18 @@ const App = () => {
   );
 
   const addEdge = (from, to) => {
-    graph.addEdge(from, to);
-    setGraph(graph);
+    graphDispatch(graphActions.addEdge(from, to));
     setEdgeWindowData(true, from, to);
   };
 
   const addEdgeData = (from, to, capacity, flow) => {
-    const edge = graph.getEdge(from, to);
-
-    edge.changeCapacityTo(capacity);
-    edge.changeFlowTo(flow);
+    graphDispatch(graphActions.addEdgeData(from, to, capacity, flow));
     setDefaultEdgeWindowData();
-    setGraph(graph);
     setDefaultMode();
   };
 
   const addNode = (id) => {
-    graph.addNode(id);
-    setGraph(graph);
+    graphDispatch(graphActions.addNode(id));
     setDefaultMode();
   };
 
@@ -77,13 +71,11 @@ const App = () => {
   const removeElement = (element) => {
     switch (element.type) {
       case 'edge':
-        graph.deleteEdge(element.from.id, element.to.id);
-        setGraph(graph);
+        graphDispatch(graphActions.deleteEdge(element.from.id, element.to.id));
 
         break;
       case 'node':
-        graph.deleteNode(element.id);
-        setGraph(graph);
+        graphDispatch(graphActions.deleteNode(element.id));
 
         break;
       default:
@@ -94,7 +86,7 @@ const App = () => {
   };
 
   const reset = () => {
-    setDefaultGraph();
+    graphDispatch(graphActions.reset());
   };
 
   return (
