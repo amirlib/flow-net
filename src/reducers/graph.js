@@ -1,7 +1,27 @@
-const addEdge = (graph, { from, to }) => graph.addEdge(from, to);
-const addNode = (graph, id) => graph.addNode(id);
-const deleteEdge = (graph, { from, to }) => graph.deleteEdge(from, to);
-const deleteNode = (graph, id) => graph.deleteNode(id);
+const addEdge = (graph, { from, to }) => {
+  graph.addEdge(from, to);
+
+  return graph;
+};
+
+const addNode = (graph, id) => {
+  graph.addNode(id);
+
+  return graph;
+};
+
+const deleteEdge = (graph, { from, to }) => {
+  graph.deleteEdge(from, to);
+
+  return graph;
+};
+
+const deleteNode = (graph, id) => {
+  graph.deleteNode(id);
+
+  return graph;
+};
+
 const addEdgeData = (
   graph,
   {
