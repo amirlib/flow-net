@@ -1,3 +1,7 @@
+const addEdge = (graph, { from, to }) => graph.addEdge(from, to);
+const addNode = (graph, id) => graph.addNode(id);
+const deleteEdge = (graph, { from, to }) => graph.deleteEdge(from, to);
+const deleteNode = (graph, id) => graph.deleteNode(id);
 const addEdgeData = (
   graph,
   {
@@ -18,23 +22,15 @@ const addEdgeData = (
 const graphReducer = (state, action) => {
   switch (action.type) {
     case 'ADD_EDGE':
-      state.addEdge(action.from, action.to);
-
-      return state;
+      return addEdge(state.clone(), action);
     case 'ADD_EDGE_DATA':
-      return addEdgeData(state, action);
+      return addEdgeData(state.clone(), action);
     case 'ADD_NODE':
-      state.addNode(action.id);
-
-      return state;
+      return addNode(state.clone(), action.id);
     case 'DELETE_EDGE':
-      state.deleteEdge(action.from, action.to);
-
-      return state;
+      return deleteEdge(state.clone(), action);
     case 'DELETE_NODE':
-      state.deleteNode(action.id);
-
-      return state;
+      return deleteNode(state.clone(), action.id);
     case 'RESET':
       return action.graph;
     default:

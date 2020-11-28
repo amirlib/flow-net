@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import PropTypes from 'prop-types';
 import Edge from '../Graphs/Edge';
 import Node from '../Graphs/Node';
 import style from './canvas.module.scss';
+import drawReducer from '../../reducers/draw';
 import utils from '../../utils';
 
 const Canvas = (props) => {
@@ -21,7 +22,7 @@ const Canvas = (props) => {
     createNodeObject(1, 700, 350),
   ];
 
-  const [draw, setDraw] = useState(getDefaultDraw());
+  const [draw, setDraw] = useReducer(drawReducer, getDefaultDraw());
 
   const createEdgeElement = (fromId, startX, startY, toId, endX, endY) => ({
     id: draw.length,
