@@ -1,5 +1,5 @@
 import Gca from 'gca';
-import React from 'react';
+import React, { useState } from 'react';
 import Canvas from '../Canvas/index';
 import Tools from '../Canvas/Tools';
 import EdgeWindow from '../EdgeWindow/index';
@@ -7,150 +7,135 @@ import Header from '../Header/index';
 import Menu from '../Menu/index';
 import style from './app.module.scss';
 
-export default class App extends React.Component {
-  static createEdgeWindowData(display, from, to) {
-    return {
-      display,
-      from,
-      to,
-    };
-  }
+const App = () => {
+  const createEdgeWindowData = (display, from, to) => ({
+    display,
+    from,
+    to,
+  });
 
-  constructor(props) {
-    super(props);
+  const tool = new Gca();
+  const getDefaultEdgeWindowData = () => createEdgeWindowData(false, -1, -1);
+  const getDefaultGraph = () => tool.CreateFlowGraph();
+  const getDefaultMode = () => 'none';
 
-    this.tool = new Gca();
-    this.graph = this.tool.CreateFlowGraph();
-    this.addEdge = this.addEdge.bind(this);
-    this.addEdgeData = this.addEdgeData.bind(this);
-    this.addNode = this.addNode.bind(this);
-    this.changeMode = this.changeMode.bind(this);
-    this.closeEdgeWindow = this.closeEdgeWindow.bind(this);
-    this.edmondsKarp = this.edmondsKarp.bind(this);
-    this.hasEdge = this.hasEdge.bind(this);
-    this.isGraphInInitiatedState = this.isGraphInInitiatedState.bind(this);
-    this.removeElement = this.removeElement.bind(this);
-    this.reset = this.reset.bind(this);
-    this.state = {
-      edgeWindowData: App.createEdgeWindowData(false, -1, -1),
-      mode: 'none',
-    };
-  }
+  const [edgeWindowData, setEdgeWindowObject] = useState(getDefaultEdgeWindowData());
+  const [graph, setGraph] = useState(getDefaultGraph());
+  const [mode, setMode] = useState(getDefaultMode());
 
-  addEdge(from, to) {
-    this.graph.addEdge(from, to);
+  const setDefaultEdgeWindowData = () => setEdgeWindowObject(getDefaultEdgeWindowData());
+  const setDefaultGraph = () => setGraph(getDefaultGraph());
+  const setDefaultMode = () => setMode(getDefaultMode());
 
-    this.setState(() => ({
-      edgeWindowData: App.createEdgeWindowData(true, from, to),
-    }));
-  }
+  const setEdgeWindowData = (display, from, to) => (
+    setEdgeWindowObject(createEdgeWindowData(display, from, to))
+  );
 
-  addEdgeData(from, to, capacity, flow) {
-    const edge = this.graph.getEdge(from, to);
+  const addEdge = (from, to) => {
+    graph.addEdge(from, to);
+    setGraph(graph);
+    setEdgeWindowData(true, from, to);
+  };
+
+  const addEdgeData = (from, to, capacity, flow) => {
+    const edge = graph.getEdge(from, to);
 
     edge.changeCapacityTo(capacity);
     edge.changeFlowTo(flow);
+    setDefaultEdgeWindowData();
+    setGraph(graph);
+    setDefaultMode();
+  };
 
-    this.setState(() => ({
-      edgeWindowData: App.createEdgeWindowData(false, -1, -1),
-      mode: 'none',
-    }));
-  }
+  const addNode = (id) => {
+    graph.addNode(id);
+    setGraph(graph);
+    setDefaultMode();
+  };
 
-  addNode(id) {
-    this.graph.addNode(id);
-    this.changeMode('none');
-  }
+  const edmondsKarp = () => {
+    alert(`The max possible flow is: ${tool.EdmondsKarp(graph)}`);
+  };
 
-  edmondsKarp() {
-    alert(`The max possible flow is: ${this.tool.EdmondsKarp(this.graph)}`);
-  }
+  const changeMode = (value) => {
+    setMode(value);
+  };
 
-  changeMode(mode) {
-    this.setState(() => ({ mode }));
-  }
+  const closeEdgeWindow = () => {
+    setDefaultEdgeWindowData();
+    setMode('undo');
+  };
 
-  closeEdgeWindow() {
-    this.setState(() => ({
-      edgeWindowData: App.createEdgeWindowData(false, -1, -1),
-      mode: 'undo',
-    }));
-  }
+  const hasEdge = (from, to) => graph.hasEdge(from, to);
 
-  hasEdge(from, to) {
-    return this.graph.hasEdge(from, to);
-  }
-
-  isGraphInInitiatedState() {
-    if (this.graph.countEdges() === 0 && this.graph.nodesID.length === 2) return true;
+  const isGraphInInitiatedState = () => {
+    if (graph.countEdges() === 0 && graph.nodesID.length === 2) return true;
 
     return false;
-  }
+  };
 
-  removeElement(element) {
+  const removeElement = (element) => {
     switch (element.type) {
       case 'edge':
-        this.graph.deleteEdge(element.from.id, element.to.id);
+        graph.deleteEdge(element.from.id, element.to.id);
+        setGraph(graph);
 
         break;
       case 'node':
-        this.graph.deleteNode(element.id);
+        graph.deleteNode(element.id);
+        setGraph(graph);
 
         break;
       default:
         break;
     }
 
-    this.changeMode('none');
-  }
+    setDefaultMode();
+  };
 
-  reset() {
-    this.graph = this.tool.CreateFlowGraph();
-  }
+  const reset = () => {
+    setDefaultGraph();
+  };
 
-  render() {
-    const title = 'Flow Networks';
-    const subtitle = 'Designer';
-    const { edgeWindowData, mode } = this.state;
-
-    return (
-      <div>
-        <Header
-          title={title}
-          subtitle={subtitle}
-        />
-        <div className={style.notSupported}>
-          <p>
-            This site do not support small screens due to the inconvenience
-            of creating graphs in small screens.
-          </p>
-        </div>
-        <div
-          id="main"
-          className={style.container}
-        >
-          <EdgeWindow
-            addEdgeData={this.addEdgeData}
-            closeEdgeWindow={this.closeEdgeWindow}
-            edgeWindowData={edgeWindowData}
-          />
-          <Menu edmondsKarp={this.edmondsKarp} />
-          <Canvas
-            mode={mode}
-            addEdge={this.addEdge}
-            addNode={this.addNode}
-            changeMode={this.changeMode}
-            hasEdge={this.hasEdge}
-            removeElement={this.removeElement}
-          />
-          <Tools
-            changeMode={this.changeMode}
-            isGraphInInitiatedState={this.isGraphInInitiatedState}
-            mode={mode}
-            reset={this.reset}
-          />
-        </div>
+  return (
+    <div>
+      <Header
+        title="Flow Networks"
+        subtitle="Designer"
+      />
+      <div className={style.notSupported}>
+        <p>
+          This site do not support small screens due to the inconvenience
+          of creating graphs in small screens.
+        </p>
       </div>
-    );
-  }
-}
+      <div
+        id="main"
+        className={style.container}
+      >
+        <EdgeWindow
+          addEdgeData={addEdgeData}
+          closeEdgeWindow={closeEdgeWindow}
+          edgeWindowData={edgeWindowData}
+        />
+        <Menu edmondsKarp={edmondsKarp} />
+        <Canvas
+          mode={mode}
+          addEdge={addEdge}
+          addNode={addNode}
+          changeMode={changeMode}
+          hasEdge={hasEdge}
+          removeElement={removeElement}
+        />
+        <Tools
+          changeMode={changeMode}
+          isGraphInInitiatedState={isGraphInInitiatedState}
+          mode={mode}
+          reset={reset}
+        />
+      </div>
+    </div>
+  );
+};
+
+export default App;

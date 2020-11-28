@@ -8,21 +8,17 @@ import utils from '../../utils';
 const Canvas = (props) => {
   const { mode } = props;
 
+  const createNodeObject = (id, coorX, coorY) => ({
+    id,
+    coorX,
+    coorY,
+    radius: 25,
+    type: 'node',
+  });
+
   const getDefaultDraw = () => [
-    {
-      id: 0,
-      coorX: 50,
-      coorY: 350,
-      radius: 25,
-      type: 'node',
-    },
-    {
-      id: 1,
-      coorX: 700,
-      coorY: 350,
-      radius: 25,
-      type: 'node',
-    },
+    createNodeObject(0, 50, 350),
+    createNodeObject(1, 700, 350),
   ];
 
   const [draw, setDraw] = useState(getDefaultDraw());
@@ -42,13 +38,7 @@ const Canvas = (props) => {
     type: 'edge',
   });
 
-  const createNodeElement = (coorX, coorY) => ({
-    id: draw.length,
-    coorX,
-    coorY,
-    radius: 25,
-    type: 'node',
-  });
+  const createNodeElement = (coorX, coorY) => createNodeObject(draw.length, coorX, coorY);
 
   const getNodeWhenMouseOn = (x, y) => {
     const coorX = utils.calculateCoorX(x);
