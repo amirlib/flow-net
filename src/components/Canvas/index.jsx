@@ -1,27 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import PropTypes from 'prop-types';
 import Edge from '../Graphs/Edge';
 import Node from '../Graphs/Node';
 import style from './canvas.module.scss';
-import utils from '../../utils';
+import drawReducer from '../../reducers/draw';
+import * as drawActions from '../../actions/draw';
+import * as utils from '../../utils';
 
 const Canvas = (props) => {
   const { mode } = props;
 
-  const createNodeObject = (id, coorX, coorY) => ({
-    id,
-    coorX,
-    coorY,
-    radius: 25,
-    type: 'node',
-  });
-
-  const getDefaultDraw = () => [
-    createNodeObject(0, 50, 350),
-    createNodeObject(1, 700, 350),
-  ];
-
-  const [draw, setDraw] = useState(getDefaultDraw());
+  const [draw, drawDispatch] = useReducer(drawReducer, utils.getDefaultDraw());
 
   const createEdgeElement = (fromId, startX, startY, toId, endX, endY) => ({
     id: draw.length,
@@ -38,7 +27,7 @@ const Canvas = (props) => {
     type: 'edge',
   });
 
-  const createNodeElement = (coorX, coorY) => createNodeObject(draw.length, coorX, coorY);
+  const createNodeElement = (coorX, coorY) => utils.createNodeObject(draw.length, coorX, coorY);
 
   const getNodeWhenMouseOn = (x, y) => {
     const coorX = utils.calculateCoorX(x);
@@ -68,22 +57,13 @@ const Canvas = (props) => {
       startNode.coorY,
     );
 
-    setDraw(draw.concat([edge]));
-  };
-
-  const setEdgeEndNode = (id) => {
-    const copiedDraw = Array.from(draw);
-    const lastElement = copiedDraw[copiedDraw.length - 1];
-
-    lastElement.to.id = id;
-
-    setDraw(copiedDraw);
+    drawDispatch(drawActions.addElement(edge));
   };
 
   const setNode = (coorX, coorY) => {
     const node = createNodeElement(coorX, coorY);
 
-    setDraw(draw.concat([node]));
+    drawDispatch(drawActions.addElement(node));
   };
 
   const isNodeOnAnotherNode = () => {
@@ -123,8 +103,8 @@ const Canvas = (props) => {
         if (lastElement.from.id === nodeMouseOn.id) break;
         if (hasEdge(lastElement.from.id, nodeMouseOn.id)) break;
 
-        setEdgeEndNode(nodeMouseOn.id);
-        addEdge(lastElement.from.id, lastElement.to.id);
+        drawDispatch(drawActions.setEdgeEndNode(nodeMouseOn.id));
+        addEdge(lastElement.from.id, nodeMouseOn.id);
 
         break;
       default:
@@ -135,42 +115,19 @@ const Canvas = (props) => {
     }
   };
 
-  const updateCoordinatesOfLastDrawElement = (pageX, pageY) => {
-    const copiedDraw = Array.from(draw);
-    const lastElement = copiedDraw[copiedDraw.length - 1];
-
-    switch (lastElement.type) {
-      case 'edge':
-        lastElement.to.coorX = utils.calculateCoorX(pageX);
-        lastElement.to.coorY = utils.calculateCoorY(pageY);
-
-        break;
-      case 'node':
-        lastElement.coorX = utils.calculateCoorX(pageX);
-        lastElement.coorY = utils.calculateCoorY(pageY);
-
-        break;
-      default:
-        break;
-    }
-
-    setDraw(copiedDraw);
-  };
-
   const canvasMouseMove = (event) => {
     switch (mode) {
       case 'new-edge':
       case 'new-node':
-        updateCoordinatesOfLastDrawElement(event.pageX, event.pageY);
+        drawDispatch(drawActions.updateLastElementCoordinates(
+          utils.calculateCoorX(event.pageX),
+          utils.calculateCoorY(event.pageY),
+        ));
 
         break;
       default:
         break;
     }
-  };
-
-  const removeLastElementFromDraw = () => {
-    setDraw(draw.slice(0, draw.length - 1));
   };
 
   const removeLastElementFromGraph = () => {
@@ -178,20 +135,20 @@ const Canvas = (props) => {
     const lastElement = draw[draw.length - 1];
 
     removeElement(lastElement);
-    removeLastElementFromDraw();
+    drawDispatch(drawActions.removeLastElement());
   };
 
   const reset = () => {
     const { changeMode } = props;
 
-    setDraw(getDefaultDraw());
+    drawDispatch(drawActions.reset());
     changeMode('none');
   };
 
   const stopDrawing = () => {
     const { changeMode } = props;
 
-    removeLastElementFromDraw();
+    drawDispatch(drawActions.removeLastElement());
     changeMode('none');
   };
 
