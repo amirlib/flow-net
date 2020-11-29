@@ -1,15 +1,22 @@
-import React, { useEffect, useReducer } from 'react';
+import React, {
+  useContext,
+  useEffect,
+  useReducer,
+} from 'react';
 import PropTypes from 'prop-types';
 import Edge from '../Graphs/Edge';
 import Node from '../Graphs/Node';
 import style from './canvas.module.scss';
+import GraphContext from '../../contexts/graph';
 import drawReducer from '../../reducers/draw';
 import * as drawActions from '../../actions/draw';
+import * as graphActions from '../../actions/graph';
 import * as utils from '../../utils';
 
 const Canvas = (props) => {
   const { mode } = props;
 
+  const { graph, graphDispatch } = useContext(GraphContext);
   const [draw, drawDispatch] = useReducer(drawReducer, utils.getDefaultDraw());
 
   const createEdgeElement = (fromId, startX, startY, toId, endX, endY) => ({
@@ -82,12 +89,7 @@ const Canvas = (props) => {
   };
 
   const canvasClick = (event) => {
-    const {
-      addEdge,
-      addNode,
-      changeMode,
-      hasEdge,
-    } = props;
+    const { changeMode, openEdgeWindow } = props;
     const lastElement = draw[draw.length - 1];
     const nodeMouseOn = getNodeWhenMouseOn(event.pageX, event.pageY);
 
@@ -95,16 +97,18 @@ const Canvas = (props) => {
       case 'new-node':
         if (isNodeOnAnotherNode()) break;
 
-        addNode(lastElement.id);
+        graphDispatch(graphActions.addNode(lastElement.id));
+        changeMode('none');
 
         break;
       case 'new-edge':
         if (nodeMouseOn === undefined) break;
         if (lastElement.from.id === nodeMouseOn.id) break;
-        if (hasEdge(lastElement.from.id, nodeMouseOn.id)) break;
+        if (graph.hasEdge(lastElement.from.id, nodeMouseOn.id)) break;
 
         drawDispatch(drawActions.setEdgeEndNode(nodeMouseOn.id));
-        addEdge(lastElement.from.id, nodeMouseOn.id);
+        graphDispatch(graphActions.addEdge(lastElement.from.id, nodeMouseOn.id));
+        openEdgeWindow(lastElement.from.id, nodeMouseOn.id);
 
         break;
       default:
@@ -130,12 +134,28 @@ const Canvas = (props) => {
     }
   };
 
-  const removeLastElementFromGraph = () => {
-    const { removeElement } = props;
+  const removeElementFromGraph = (element) => {
+    switch (element.type) {
+      case 'edge':
+        graphDispatch(graphActions.deleteEdge(element.from.id, element.to.id));
+
+        break;
+      case 'node':
+        graphDispatch(graphActions.deleteNode(element.id));
+
+        break;
+      default:
+        break;
+    }
+  };
+
+  const removeLastElement = () => {
+    const { changeMode } = props;
     const lastElement = draw[draw.length - 1];
 
-    removeElement(lastElement);
     drawDispatch(drawActions.removeLastElement());
+    removeElementFromGraph(lastElement);
+    changeMode('none');
   };
 
   const reset = () => {
@@ -167,7 +187,7 @@ const Canvas = (props) => {
 
         break;
       case 'undo':
-        removeLastElementFromGraph();
+        removeLastElement();
 
         break;
       default:
@@ -224,12 +244,9 @@ const Canvas = (props) => {
 };
 
 Canvas.propTypes = {
-  addEdge: PropTypes.func.isRequired,
-  addNode: PropTypes.func.isRequired,
   changeMode: PropTypes.func.isRequired,
-  hasEdge: PropTypes.func.isRequired,
   mode: PropTypes.string,
-  removeElement: PropTypes.func.isRequired,
+  openEdgeWindow: PropTypes.func.isRequired,
 };
 
 Canvas.defaultProps = {

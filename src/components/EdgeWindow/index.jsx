@@ -38,9 +38,9 @@ const EdgeWindow = (props) => {
   };
 
   const updateEdgeData = () => {
-    const { addEdgeData, edgeWindowData } = props;
+    const { edgeWindowData, updateEdge } = props;
 
-    addEdgeData(edgeWindowData.from, edgeWindowData.to, capacity, flow);
+    updateEdge(edgeWindowData.from, edgeWindowData.to, capacity, flow);
     setCapacity(1);
     setFlow(0);
   };
@@ -108,13 +108,13 @@ const EdgeWindow = (props) => {
 };
 
 EdgeWindow.propTypes = {
-  addEdgeData: PropTypes.func.isRequired,
   closeEdgeWindow: PropTypes.func.isRequired,
   edgeWindowData: PropTypes.shape({
     display: PropTypes.bool.isRequired,
     from: PropTypes.number.isRequired,
     to: PropTypes.number.isRequired,
   }).isRequired,
+  updateEdge: PropTypes.func.isRequired,
 };
 
 export default EdgeWindow;

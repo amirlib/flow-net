@@ -6,6 +6,7 @@ import EdgeWindow from '../EdgeWindow/index';
 import Header from '../Header/index';
 import Menu from '../Menu/index';
 import * as graphActions from '../../actions/graph';
+import GraphContext from '../../contexts/graph';
 import graphReducer from '../../reducers/graph';
 import style from './app.module.scss';
 
@@ -31,19 +32,9 @@ const App = () => {
     setEdgeWindowObject(createEdgeWindowData(display, from, to))
   );
 
-  const addEdge = (from, to) => {
-    graphDispatch(graphActions.addEdge(from, to));
-    setEdgeWindowData(true, from, to);
-  };
-
-  const addEdgeData = (from, to, capacity, flow) => {
-    graphDispatch(graphActions.addEdgeData(from, to, capacity, flow));
+  const updateEdge = (from, to, capacity, flow) => {
+    graphDispatch(graphActions.updateEdge(from, to, capacity, flow));
     setDefaultEdgeWindowData();
-    setDefaultMode();
-  };
-
-  const addNode = (id) => {
-    graphDispatch(graphActions.addNode(id));
     setDefaultMode();
   };
 
@@ -60,37 +51,12 @@ const App = () => {
     setMode('undo');
   };
 
-  const hasEdge = (from, to) => graph.hasEdge(from, to);
-
-  const isGraphInInitiatedState = () => {
-    if (graph.countEdges() === 0 && graph.nodesID.length === 2) return true;
-
-    return false;
-  };
-
-  const removeElement = (element) => {
-    switch (element.type) {
-      case 'edge':
-        graphDispatch(graphActions.deleteEdge(element.from.id, element.to.id));
-
-        break;
-      case 'node':
-        graphDispatch(graphActions.deleteNode(element.id));
-
-        break;
-      default:
-        break;
-    }
-
-    setDefaultMode();
-  };
-
-  const reset = () => {
-    graphDispatch(graphActions.reset());
+  const openEdgeWindow = (from, to) => {
+    setEdgeWindowData(true, from, to);
   };
 
   return (
-    <div>
+    <GraphContext.Provider value={{ graph, graphDispatch }}>
       <Header
         title="Flow Networks"
         subtitle="Designer"
@@ -106,27 +72,22 @@ const App = () => {
         className={style.container}
       >
         <EdgeWindow
-          addEdgeData={addEdgeData}
+          updateEdge={updateEdge}
           closeEdgeWindow={closeEdgeWindow}
           edgeWindowData={edgeWindowData}
         />
         <Menu edmondsKarp={edmondsKarp} />
         <Canvas
           mode={mode}
-          addEdge={addEdge}
-          addNode={addNode}
           changeMode={changeMode}
-          hasEdge={hasEdge}
-          removeElement={removeElement}
+          openEdgeWindow={openEdgeWindow}
         />
         <Tools
           changeMode={changeMode}
-          isGraphInInitiatedState={isGraphInInitiatedState}
           mode={mode}
-          reset={reset}
         />
       </div>
-    </div>
+    </GraphContext.Provider>
   );
 };
 

@@ -8,14 +8,6 @@ export const addEdge = (from, to) => ({
   type: 'ADD_EDGE',
 });
 
-export const addEdgeData = (from, to, capacity, flow) => ({
-  from,
-  to,
-  capacity,
-  flow,
-  type: 'ADD_EDGE_DATA',
-});
-
 export const addNode = (id) => ({
   id,
   type: 'ADD_NODE',
@@ -35,4 +27,12 @@ export const deleteNode = (id) => ({
 export const reset = () => ({
   graph: tool.CreateFlowGraph(),
   type: 'RESET',
+});
+
+export const updateEdge = (from, to, capacity, flow) => ({
+  from,
+  to,
+  capacity,
+  flow,
+  type: 'UPDATE_EDGE',
 });

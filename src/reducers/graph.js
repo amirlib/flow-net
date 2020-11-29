@@ -22,7 +22,7 @@ const deleteNode = (graph, id) => {
   return graph;
 };
 
-const addEdgeData = (
+const updateEdge = (
   graph,
   {
     from,
@@ -43,8 +43,6 @@ const graphReducer = (state, action) => {
   switch (action.type) {
     case 'ADD_EDGE':
       return addEdge(state.clone(), action);
-    case 'ADD_EDGE_DATA':
-      return addEdgeData(state.clone(), action);
     case 'ADD_NODE':
       return addNode(state.clone(), action.id);
     case 'DELETE_EDGE':
@@ -53,6 +51,8 @@ const graphReducer = (state, action) => {
       return deleteNode(state.clone(), action.id);
     case 'RESET':
       return action.graph;
+    case 'UPDATE_EDGE':
+      return updateEdge(state.clone(), action);
     default:
       return state;
   }

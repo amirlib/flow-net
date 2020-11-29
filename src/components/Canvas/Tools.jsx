@@ -1,19 +1,30 @@
-import React, { useEffect, useState } from 'react';
+import React, {
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import PropTypes from 'prop-types';
 import Button from '../Buttons/Button';
+import { reset } from '../../actions/graph';
+import GraphContext from '../../contexts/graph';
 import style from './tools.module.scss';
 
 const Tools = (props) => {
-  const {
-    changeMode,
-    isGraphInInitiatedState,
-    mode,
-    reset,
-  } = props;
+  const { changeMode, mode } = props;
+
+  const { graph, graphDispatch } = useContext(GraphContext);
   const [nodeButtonDisabled, setNodeButtonDisabled] = useState(false);
   const [resetButtonDisabled, setResetButtonDisabled] = useState(true);
   const [stopButtonDisabled, setStopButtonDisabled] = useState(true);
   const [undoButtonDisabled, setUndoButtonDisabled] = useState(true);
+
+  const isGraphInInitiatedState = () => {
+    if (graph.countEdges() === 0 && graph.nodesID.length === 2) return true;
+
+    return false;
+  };
+
+  const resetGraph = () => graphDispatch(reset());
 
   useEffect(() => {
     switch (mode) {
@@ -26,7 +37,7 @@ const Tools = (props) => {
 
         break;
       case 'reset':
-        reset();
+        resetGraph();
         setNodeButtonDisabled(false);
         setResetButtonDisabled(true);
         setStopButtonDisabled(true);
@@ -78,9 +89,7 @@ const Tools = (props) => {
 
 Tools.propTypes = {
   changeMode: PropTypes.func.isRequired,
-  isGraphInInitiatedState: PropTypes.func.isRequired,
   mode: PropTypes.string,
-  reset: PropTypes.func.isRequired,
 };
 
 Tools.defaultProps = {
