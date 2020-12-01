@@ -1,11 +1,11 @@
 import Gca from 'gca';
 import {
   addEdge,
-  addEdgeData,
   addNode,
   deleteEdge,
   deleteNode,
   reset,
+  updateEdge,
 } from '../../src/actions/graph';
 
 const tool = new Gca();
@@ -19,22 +19,6 @@ test('should setup new edge object', () => {
     from,
     to,
     type: 'ADD_EDGE',
-  });
-});
-
-test('should setup new edge data object', () => {
-  const from = 0;
-  const to = 1;
-  const capacity = 2;
-  const flow = 1;
-  const action = addEdgeData(from, to, capacity, flow);
-
-  expect(action).toEqual({
-    from,
-    to,
-    capacity,
-    flow,
-    type: 'ADD_EDGE_DATA',
   });
 });
 
@@ -77,5 +61,21 @@ test('should setup reset object', () => {
   expect(action).toEqual({
     graph,
     type: 'RESET',
+  });
+});
+
+test('should setup update edge object', () => {
+  const from = 0;
+  const to = 1;
+  const capacity = 2;
+  const flow = 1;
+  const action = updateEdge(from, to, capacity, flow);
+
+  expect(action).toEqual({
+    from,
+    to,
+    capacity,
+    flow,
+    type: 'UPDATE_EDGE',
   });
 });

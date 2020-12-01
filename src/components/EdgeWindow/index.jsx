@@ -5,9 +5,27 @@ import Button from '../Buttons/Button';
 import style from './window.module.scss';
 
 const EdgeWindow = (props) => {
-  const { closeEdgeWindow } = props;
   const [capacity, setCapacity] = useState(1);
   const [flow, setFlow] = useState(0);
+
+  const setDefaultValues = () => {
+    setCapacity(1);
+    setFlow(0);
+  };
+
+  const create = () => {
+    const { onSubmit } = props;
+
+    setDefaultValues();
+    onSubmit(capacity, flow);
+  };
+
+  const onCancelClick = () => {
+    const { onCancel } = props;
+
+    setDefaultValues();
+    onCancel();
+  };
 
   const onCapacityChange = (e) => {
     const { value } = e.target;
@@ -30,19 +48,11 @@ const EdgeWindow = (props) => {
   };
 
   const parseDisplayValue = () => {
-    const { edgeWindowData } = props;
+    const { open } = props;
 
-    if (edgeWindowData.display) return 'flex';
+    if (open) return 'flex';
 
     return 'none';
-  };
-
-  const updateEdgeData = () => {
-    const { edgeWindowData, updateEdge } = props;
-
-    updateEdge(edgeWindowData.from, edgeWindowData.to, capacity, flow);
-    setCapacity(1);
-    setFlow(0);
   };
 
   return (
@@ -93,12 +103,12 @@ const EdgeWindow = (props) => {
 
         <div className={style.form}>
           <Button
-            func={updateEdgeData}
+            func={create}
             text="Create"
           />
 
           <Button
-            func={closeEdgeWindow}
+            func={onCancelClick}
             text="Cancel"
           />
         </div>
@@ -108,13 +118,9 @@ const EdgeWindow = (props) => {
 };
 
 EdgeWindow.propTypes = {
-  closeEdgeWindow: PropTypes.func.isRequired,
-  edgeWindowData: PropTypes.shape({
-    display: PropTypes.bool.isRequired,
-    from: PropTypes.number.isRequired,
-    to: PropTypes.number.isRequired,
-  }).isRequired,
-  updateEdge: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  open: PropTypes.bool.isRequired,
 };
 
 export default EdgeWindow;

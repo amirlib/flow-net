@@ -1,8 +1,11 @@
+import Gca from 'gca';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Tools from './Tools';
+import GraphContext from '../../contexts/graph';
 
+const tools = new Gca();
 let changeModeMock;
 let resetMock;
 
@@ -10,12 +13,18 @@ const isGraphInInitiatedStateMock = () => true;
 
 const renderComponent = (mode = 'none') => {
   const component = (
-    <Tools
-      changeMode={changeModeMock}
-      isGraphInInitiatedState={isGraphInInitiatedStateMock}
-      mode={mode}
-      reset={resetMock}
-    />
+    <GraphContext.Provider value={{
+      graph: tools.CreateFlowGraph(),
+      graphDispatch: () => {},
+    }}
+    >
+      <Tools
+        changeMode={changeModeMock}
+        isGraphInInitiatedState={isGraphInInitiatedStateMock}
+        mode={mode}
+        reset={resetMock}
+      />
+    </GraphContext.Provider>
   );
 
   render(component);

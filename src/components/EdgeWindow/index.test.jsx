@@ -2,20 +2,19 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import EdgeWindow from './index';
-import edgeData from '../../../test/fixtures/edgeWindowData';
 
-let addEdgeDataMock;
-let closeEdgeWindowMock;
+let onEdgeWindowCancelMock;
+let onEdgeWindowSubmitMock;
 let component;
 
 beforeEach(() => {
-  addEdgeDataMock = jest.fn();
-  closeEdgeWindowMock = jest.fn();
+  onEdgeWindowCancelMock = jest.fn();
+  onEdgeWindowSubmitMock = jest.fn();
   component = (
     <EdgeWindow
-      addEdgeData={addEdgeDataMock}
-      closeEdgeWindow={closeEdgeWindowMock}
-      edgeWindowData={edgeData}
+      onCancel={onEdgeWindowCancelMock}
+      onSubmit={onEdgeWindowSubmitMock}
+      open
     />
   );
 });
@@ -60,21 +59,19 @@ test('should not set flow if invalid input', () => {
   expect(input.value).toBe('0');
 });
 
-test('should call addEdgeData method with default values', () => {
+test('should call onSubmit method with default values', () => {
   render(component);
 
   const button = screen.getByRole('button', { name: 'Create' });
 
   userEvent.click(button);
-  expect(addEdgeDataMock).toHaveBeenLastCalledWith(
-    edgeData.from,
-    edgeData.to,
+  expect(onEdgeWindowSubmitMock).toHaveBeenLastCalledWith(
     1,
     0,
   );
 });
 
-test('should call addEdgeData method with alt values', () => {
+test('should call onSubmit method with alt values', () => {
   render(component);
 
   const capacityInput = screen.getByLabelText('Capacity');
@@ -84,9 +81,7 @@ test('should call addEdgeData method with alt values', () => {
   fireEvent.change(capacityInput, { target: { value: 2 } });
   fireEvent.change(flowInput, { target: { value: 1 } });
   userEvent.click(button);
-  expect(addEdgeDataMock).toHaveBeenLastCalledWith(
-    edgeData.from,
-    edgeData.to,
+  expect(onEdgeWindowSubmitMock).toHaveBeenLastCalledWith(
     2,
     1,
   );

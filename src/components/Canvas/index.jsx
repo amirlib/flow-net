@@ -4,13 +4,16 @@ import React, {
   useReducer,
 } from 'react';
 import PropTypes from 'prop-types';
+import EdgeWindow from '../EdgeWindow/index';
 import Edge from '../Graphs/Edge';
 import Node from '../Graphs/Node';
 import style from './canvas.module.scss';
 import GraphContext from '../../contexts/graph';
 import drawReducer from '../../reducers/draw';
+import edgeWindowReducer, { defaultEdgeWindowReducerState } from '../../reducers/edgeWindow';
 import * as drawActions from '../../actions/draw';
 import * as graphActions from '../../actions/graph';
+import * as windowActions from '../../actions/edgeWindow';
 import * as utils from '../../utils';
 
 const Canvas = (props) => {
@@ -18,6 +21,10 @@ const Canvas = (props) => {
 
   const { graph, graphDispatch } = useContext(GraphContext);
   const [draw, drawDispatch] = useReducer(drawReducer, utils.getDefaultDraw());
+  const [edgeWindow, edgeWindowDispatch] = useReducer(
+    edgeWindowReducer,
+    defaultEdgeWindowReducerState,
+  );
 
   const createEdgeElement = (fromId, startX, startY, toId, endX, endY) => ({
     id: draw.length,
@@ -89,7 +96,7 @@ const Canvas = (props) => {
   };
 
   const canvasClick = (event) => {
-    const { changeMode, openEdgeWindow } = props;
+    const { changeMode } = props;
     const lastElement = draw[draw.length - 1];
     const nodeMouseOn = getNodeWhenMouseOn(event.pageX, event.pageY);
 
@@ -108,7 +115,11 @@ const Canvas = (props) => {
 
         drawDispatch(drawActions.setEdgeEndNode(nodeMouseOn.id));
         graphDispatch(graphActions.addEdge(lastElement.from.id, nodeMouseOn.id));
-        openEdgeWindow(lastElement.from.id, nodeMouseOn.id);
+        edgeWindowDispatch(windowActions.openWindow());
+        edgeWindowDispatch(windowActions.setData({
+          from: lastElement.from.id,
+          to: nodeMouseOn.id,
+        }));
 
         break;
       default:
@@ -172,6 +183,22 @@ const Canvas = (props) => {
     changeMode('none');
   };
 
+  const onEdgeWindowCancel = () => {
+    const { changeMode } = props;
+
+    edgeWindowDispatch(windowActions.cancel());
+    changeMode('undo');
+  };
+
+  const onEdgeWindowSubmit = (capacity, flow) => {
+    const { from, to } = edgeWindow.data;
+    const { changeMode } = props;
+
+    graphDispatch(graphActions.updateEdge(from, to, capacity, flow));
+    edgeWindowDispatch(windowActions.closeWindow());
+    changeMode('none');
+  };
+
   useEffect(() => {
     switch (mode) {
       case 'new-node':
@@ -200,6 +227,11 @@ const Canvas = (props) => {
       id="canvas"
       className={style.canvas}
     >
+      <EdgeWindow
+        onCancel={onEdgeWindowCancel}
+        onSubmit={onEdgeWindowSubmit}
+        open={edgeWindow.open}
+      />
       <svg
         className={style.svg}
         onClick={canvasClick}
@@ -246,7 +278,6 @@ const Canvas = (props) => {
 Canvas.propTypes = {
   changeMode: PropTypes.func.isRequired,
   mode: PropTypes.string,
-  openEdgeWindow: PropTypes.func.isRequired,
 };
 
 Canvas.defaultProps = {
